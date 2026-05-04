@@ -1,4 +1,4 @@
-import { FEATURES } from './features';
+import { FEATURES } from './featuresData';
 
 export function Features() {
   return (
