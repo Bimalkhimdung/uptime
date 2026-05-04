@@ -1,61 +1,27 @@
-version: '3.9'
-
 services:
-  postgres:
-    image: postgres:16-alpine
-    container_name: uptime_postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_USER: uptime
-      POSTGRES_PASSWORD: uptime_secret
-      POSTGRES_DB: uptime_db
-    ports:
-      - '5432:5432'
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ['CMD-SHELL', 'pg_isready -U uptime']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:7-alpine
-    container_name: uptime_redis
-    restart: unless-stopped
-    ports:
-      - '6379:6379'
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ['CMD', 'redis-cli', 'ping']
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
     container_name: uptime_backend
     restart: unless-stopped
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://uptime:uptime_secret@postgres:5432/uptime_db
-      REDIS_HOST: redis
+      DATABASE_URL: postgresql://user:password@host:port/db
+      REDIS_HOST: redis_host
       REDIS_PORT: 6379
-      JWT_SECRET: super_secret_jwt_key_change_in_production
-      SMTP_HOST: smtp.gmail.com
+      JWT_SECRET: your_jwt_secret
+      SMTP_HOST: smtp.example.com
       SMTP_PORT: 587
-      SMTP_USER: your@email.com
-      SMTP_PASS: your_app_password
+      SMTP_USER: your_email@example.com
+      SMTP_PASS: your_smtp_password
+      SMTP_FROM: "your_email@example.com"
       PORT: 3001
+      GOOGLE_CLIENT_ID: your_google_client_id
+      GOOGLE_CLIENT_SECRET: your_google_client_secret
+      GOOGLE_CALLBACK_URL: http://localhost:3001/api/auth/google/callback
+      FRONTEND_URL: http://localhost:3000
     ports:
-      - '3001:3001'
+      - '3003:3001'
 
   frontend:
     build:
@@ -66,10 +32,6 @@ services:
     depends_on:
       - backend
     environment:
-      NEXT_PUBLIC_API_URL: http://localhost:3001
+      NEXT_PUBLIC_API_URL: https://uptime.nepsesignal.com/api
     ports:
-      - '3000:3000'
-
-volumes:
-  postgres_data:
-  redis_data:
+      - '3004:3000'
