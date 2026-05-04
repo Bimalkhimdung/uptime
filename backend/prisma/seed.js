@@ -1,10 +1,10 @@
-import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcryptjs';
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcryptjs');
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'bimalkhimdung@gmail.com';
+  const email = 'bimal@uptime.local';
   const password = await bcrypt.hash('password', 12);
 
   const user = await prisma.user.upsert({
