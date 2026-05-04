@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'bimal@uptime.local';
+  const email = 'bimalkhimdung@gmail.com';
   const password = await bcrypt.hash('password', 12);
 
   const user = await prisma.user.upsert({
