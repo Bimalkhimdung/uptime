@@ -1,0 +1,94 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(uuid())
+  email     String    @unique
+  username  String?   @unique
+  password  String
+  name      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  monitors  Monitor[]
+}
+
+model Monitor {
+  id              String      @id @default(uuid())
+  userId          String
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name            String
+  url             String
+  interval        Int         @default(5) // minutes
+  timeout         Int         @default(10) // seconds
+  status          MonitorStatus @default(PENDING)
+  isActive        Boolean     @default(true)
+  lastCheckedAt   DateTime?
+  lastStatusCode  Int?
+  lastResponseTime Int?       // ms
+  uptimePercent   Float       @default(100)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  checks          Check[]
+  incidents       Incident[]
+  alertContacts   AlertContact[]
+}
+
+model Check {
+  id           String      @id @default(uuid())
+  monitorId    String
+  monitor      Monitor     @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  status       CheckStatus
+  statusCode   Int?
+  responseTime Int?        // ms
+  errorMessage String?
+  checkedAt    DateTime    @default(now())
+
+  @@index([monitorId, checkedAt])
+}
+
+model Incident {
+  id          String    @id @default(uuid())
+  monitorId   String
+  monitor     Monitor   @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  startTime   DateTime  @default(now())
+  endTime     DateTime?
+  duration    Int?      // seconds
+  resolved    Boolean   @default(false)
+  errorMessage String?
+  createdAt   DateTime  @default(now())
+}
+
+model AlertContact {
+  id        String   @id @default(uuid())
+  monitorId String
+  monitor   Monitor  @relation(fields: [monitorId], references: [id], onDelete: Cascade)
+  type      AlertType @default(EMAIL)
+  value     String   // email address or webhook URL
+  createdAt DateTime @default(now())
+}
+
+enum MonitorStatus {
+  PENDING
+  UP
+  DOWN
+}
+
+enum CheckStatus {
+  UP
+  DOWN
+}
+
+enum AlertType {
+  EMAIL
+  SLACK
+  WEBHOOK
+}
