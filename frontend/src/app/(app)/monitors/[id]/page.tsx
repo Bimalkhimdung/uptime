@@ -3,7 +3,10 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import Link from 'next/link';
+import { useAuth } from '@/contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { TestNotificationModal } from '@/components/dashboard/TestNotificationModal';
+import { RegionMap } from '@/components/dashboard/RegionMap';
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { dot: string; text: string; bg: string; label: string }> = {
@@ -26,6 +29,165 @@ function formatDuration(seconds: number) {
   return `${Math.floor(seconds / 3600)}h ${Math.floor((seconds % 3600) / 60)}m`;
 }
 
+function DomainSslCard({ monitor }: { monitor: any }) {
+  const isHttps = typeof monitor.url === 'string' && monitor.url.startsWith('https');
+  const ssl = {
+    validUntil: monitor.sslValidUntil ? new Date(monitor.sslValidUntil) : null,
+    daysLeft: monitor.sslDaysLeft as number | null | undefined,
+    issuer: monitor.sslIssuer as string | null,
+    valid: monitor.sslValid as boolean | null,
+    checkedAt: monitor.sslLastCheckedAt ? new Date(monitor.sslLastCheckedAt) : null,
+  };
+  const domainResolved = monitor.domainResolved as boolean | null;
+  const domain = {
+    expiresAt: monitor.domainExpiresAt ? new Date(monitor.domainExpiresAt) : null,
+    daysLeft: monitor.domainDaysLeft as number | null,
+    registrar: monitor.domainRegistrar as string | null,
+    checkedAt: monitor.domainLastCheckedAt ? new Date(monitor.domainLastCheckedAt) : null,
+  };
+
+  const tone = {
+    good: 'text-emerald-400',
+    warn: 'text-amber-400',
+    bad: 'text-red-400',
+    unknown: 'text-slate-400',
+  };
+
+  let sslTone: keyof typeof tone = 'unknown';
+  if (ssl.daysLeft != null && ssl.valid != null) {
+    if (!ssl.valid) sslTone = 'bad';
+    else if (ssl.daysLeft < 14) sslTone = 'warn';
+    else sslTone = 'good';
+  }
+
+  let domainTone: keyof typeof tone = 'unknown';
+  if (domain.daysLeft != null) {
+    if (domain.daysLeft <= 0) domainTone = 'bad';
+    else if (domain.daysLeft < 30) domainTone = 'warn';
+    else domainTone = 'good';
+  }
+
+  const toneClass = tone[sslTone];
+  const domainToneClass = tone[domainTone];
+
+  return (
+    <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
+      <h3 className="font-bold text-white mb-6">
+        Domain &amp; SSL<span className="text-emerald-400">.</span>
+      </h3>
+
+      <div className="mb-6">
+        <p className="text-sm text-slate-400 mb-2">DNS</p>
+        {domainResolved === false ? (
+          <div className="flex items-center gap-2 text-red-400 font-semibold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="15" y1="9" x2="9" y2="15" />
+              <line x1="9" y1="9" x2="15" y2="15" />
+            </svg>
+            Did not resolve
+          </div>
+        ) : domainResolved === true ? (
+          <div className="flex items-center gap-2 text-emerald-400 font-semibold">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+            Resolves
+          </div>
+        ) : (
+          <div className="flex items-center gap-2 text-slate-500">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            Awaiting first check
+          </div>
+        )}
+      </div>
+
+      <div className="mb-6">
+        <p className="text-sm text-slate-400 mb-2">Domain registration</p>
+        {!domain.expiresAt ? (
+          <p className="text-slate-500 text-sm">
+            {domain.checkedAt ? 'WHOIS unavailable' : 'Awaiting first WHOIS lookup'}
+          </p>
+        ) : (
+          <>
+            <div className={`flex items-center gap-2 font-semibold ${domainToneClass}`}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20" />
+              </svg>
+              {domain.daysLeft != null && domain.daysLeft <= 0
+                ? 'Expired'
+                : `${domain.daysLeft ?? '—'} days left`}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">
+              Expires{' '}
+              <span className="text-slate-300">
+                {domain.expiresAt.toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            </p>
+            {domain.registrar && (
+              <p className="text-xs text-slate-500 mt-1 truncate" title={domain.registrar}>
+                Registrar <span className="text-slate-300">{domain.registrar}</span>
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="mb-2">
+        <p className="text-sm text-slate-400 mb-2">SSL certificate</p>
+        {!isHttps ? (
+          <p className="text-slate-500 text-sm">Not applicable (HTTP)</p>
+        ) : !ssl.validUntil ? (
+          <p className="text-slate-500 text-sm">Awaiting first HTTPS check</p>
+        ) : (
+          <>
+            <div className={`flex items-center gap-2 font-semibold ${toneClass}`}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              {ssl.valid === false
+                ? 'Invalid certificate'
+                : ssl.daysLeft != null && ssl.daysLeft <= 0
+                ? 'Expired'
+                : `${ssl.daysLeft ?? '—'} days left`}
+            </div>
+            <p className="text-xs text-slate-500 mt-2">
+              Valid until{' '}
+              <span className="text-slate-300">
+                {ssl.validUntil.toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                })}
+              </span>
+            </p>
+            {ssl.issuer && (
+              <p className="text-xs text-slate-500 mt-1 truncate" title={ssl.issuer}>
+                Issuer <span className="text-slate-300">{ssl.issuer}</span>
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      {ssl.checkedAt && (
+        <p className="text-[10px] text-slate-600 uppercase tracking-widest mt-4">
+          Checked {timeAgo(ssl.checkedAt.toISOString())}
+        </p>
+      )}
+    </div>
+  );
+}
+
 function timeAgo(dateString: string | null) {
   if (!dateString) return 'Never';
   const seconds = Math.floor((new Date().getTime() - new Date(dateString).getTime()) / 1000);
@@ -35,7 +197,19 @@ function timeAgo(dateString: string | null) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
+/** Renders a relative timestamp that re-computes every second so the user sees it tick. */
+function LiveTimeAgo({ dateString }: { dateString: string | null }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    if (!dateString) return;
+    const id = setInterval(() => setTick((t) => t + 1), 1000);
+    return () => clearInterval(id);
+  }, [dateString]);
+  return <>{timeAgo(dateString)}</>;
+}
+
 export default function MonitorDetailPage() {
+  const { user } = useAuth();
   const params = useParams();
   const id = params.id as string;
 
@@ -43,6 +217,7 @@ export default function MonitorDetailPage() {
   const [checks, setChecks] = useState<any[]>([]);
   const [incidents, setIncidents] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
+  const [showTestModal, setShowTestModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -121,7 +296,7 @@ export default function MonitorDetailPage() {
         </div>
         
         <div className="flex items-center gap-3">
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
+          <button onClick={() => setShowTestModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             Test Notification
           </button>
@@ -156,14 +331,10 @@ export default function MonitorDetailPage() {
             
             <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
               <p className="text-sm text-slate-400 mb-3">Last check</p>
-              <h2 className="text-2xl font-bold text-white mb-2">{timeAgo(monitor.lastCheckedAt)}</h2>
-              <div className="flex items-center gap-2 text-sm text-slate-400">
-                <span>Checked every {monitor.interval}m</span>
-                <span className="flex items-center gap-1 text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded text-xs font-medium border border-emerald-500/20">
-                  <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                  Get 60 sec. checks
-                </span>
-              </div>
+              <h2 className="text-2xl font-bold text-white mb-2 tabular-nums">
+                <LiveTimeAgo dateString={monitor.lastCheckedAt} />
+              </h2>
+              <p className="text-sm text-slate-400">Checked every {monitor.interval}m</p>
             </div>
 
             <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
@@ -318,58 +489,32 @@ export default function MonitorDetailPage() {
         {/* Right Sidebar Column */}
         <div className="space-y-6">
           
-          {/* Domain & SSL */}
+          <DomainSslCard monitor={monitor} />
+
+          {/* Notified to */}
           <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
-            <h3 className="font-bold text-white mb-6">Domain & SSL<span className="text-emerald-400">.</span></h3>
-            
-            <div className="mb-6">
-              <p className="text-sm text-slate-400 mb-2">Domain valid until</p>
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                Unlock
-              </div>
-            </div>
-
-            <div className="mb-6">
-              <p className="text-sm text-slate-400 mb-2">SSL certificate valid until</p>
-              <div className="flex items-center gap-2 text-white font-semibold">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-                Unlock
-              </div>
-            </div>
-
-            <div className="bg-[#1a1d24] rounded-lg p-3 text-xs text-slate-400">
-              Available only in <strong className="text-white">Solo, Team</strong> and <strong className="text-white">Enterprise</strong>. <a href="#" className="text-emerald-400 hover:underline">Upgrade now</a>
-            </div>
+            <h3 className="font-bold text-white mb-2">
+              Notified to<span className="text-emerald-400">.</span>
+            </h3>
+            <p className="text-sm text-slate-400 truncate" title={user?.email}>
+              {user?.email || 'Not logged in'}
+            </p>
           </div>
 
-          {/* Next maintenance */}
-          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="font-bold text-white">Next maintenance<span className="text-emerald-400">.</span></h3>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-slate-500"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-            </div>
-            <p className="text-sm text-slate-400 mb-4 text-center py-4">No maintenance planned.</p>
-            <button className="w-full py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium text-white transition-colors">
-              Set up maintenance
-            </button>
-          </div>
 
-          {/* Regions */}
-          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
-            <h3 className="font-bold text-white mb-6">Regions<span className="text-emerald-400">.</span></h3>
-            <div className="bg-[#13151a] rounded-lg p-4 h-32 flex items-center justify-center relative overflow-hidden border border-white/5">
-              {/* Very simplified map representation for aesthetics */}
-              <div className="absolute inset-0 opacity-20 pointer-events-none flex items-center justify-center text-[10px] text-emerald-400">
-                [ Map Visualization ]
-              </div>
-              <div className="absolute w-3 h-3 bg-emerald-500 rounded-full shadow-[0_0_10px_#10b981] animate-pulse left-[30%] top-[40%]"></div>
-            </div>
-            <p className="text-sm text-slate-400 mt-3">North America</p>
-          </div>
+          <RegionMap monitor={monitor} />
 
         </div>
       </div>
+
+      {showTestModal && user && (
+        <TestNotificationModal
+          monitorId={monitor.id}
+          monitorName={monitor.name}
+          userEmail={user.email}
+          onClose={() => setShowTestModal(false)}
+        />
+      )}
     </div>
   );
 }

@@ -21,18 +21,21 @@ export class AuthService {
       data: { email: dto.email, password: hashed, name: dto.name },
     });
 
-    const token = this.signToken(user.id, user.email);
+    const token = this.signTokenForUser(user);
     return { token, user: this.sanitize(user) };
   }
 
   async login(dto: LoginDto) {
-    const user = await this.prisma.user.findUnique({ where: { email: dto.email } });
-    if (!user) throw new UnauthorizedException('Invalid credentials');
+    const identifier = dto.email;
+    const user = await this.prisma.user.findFirst({
+      where: { OR: [{ email: identifier }, { username: identifier }] },
+    });
+    if (!user || !user.password) throw new UnauthorizedException('Invalid credentials');
 
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    const token = this.signToken(user.id, user.email);
+    const token = this.signTokenForUser(user);
     return { token, user: this.sanitize(user) };
   }
 
@@ -42,8 +45,41 @@ export class AuthService {
     return this.sanitize(user);
   }
 
-  private signToken(userId: string, email: string) {
-    return this.jwtService.sign({ sub: userId, email });
+  /**
+   * Find a user by Google ID. If not found, link by matching email or create a new account.
+   * Used by GoogleStrategy.validate.
+   */
+  async findOrCreateGoogleUser(input: {
+    googleId: string;
+    email: string;
+    name?: string | null;
+  }) {
+    const byGoogle = await this.prisma.user.findUnique({
+      where: { googleId: input.googleId },
+    });
+    if (byGoogle) return byGoogle;
+
+    const byEmail = await this.prisma.user.findUnique({
+      where: { email: input.email },
+    });
+    if (byEmail) {
+      return this.prisma.user.update({
+        where: { id: byEmail.id },
+        data: { googleId: input.googleId, name: byEmail.name ?? input.name ?? null },
+      });
+    }
+
+    return this.prisma.user.create({
+      data: {
+        email: input.email,
+        name: input.name ?? null,
+        googleId: input.googleId,
+      },
+    });
+  }
+
+  signTokenForUser(user: { id: string; email: string }) {
+    return this.jwtService.sign({ sub: user.id, email: user.email });
   }
 
   private sanitize(user: any) {

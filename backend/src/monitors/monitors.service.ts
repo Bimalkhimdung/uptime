@@ -7,12 +7,16 @@ import { PrismaService } from '../prisma/prisma.service';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 import { CreateMonitorDto, UpdateMonitorDto } from './dto/monitor.dto';
+import { SchedulerService } from '../scheduler/scheduler.service';
+import { AlertsService } from '../alerts/alerts.service';
 
 @Injectable()
 export class MonitorsService {
   constructor(
     private prisma: PrismaService,
     @InjectQueue('monitor-checks') private checksQueue: Queue,
+    private scheduler: SchedulerService,
+    private alerts: AlertsService,
   ) {}
 
   async create(userId: string, dto: CreateMonitorDto) {
@@ -38,6 +42,18 @@ export class MonitorsService {
       { monitorId: monitor.id },
       { jobId: `immediate-${monitor.id}` },
     );
+
+    // Fire-and-forget WHOIS + geo lookups so the detail page has data on first load.
+    this.scheduler
+      .refreshWhoisForMonitor(monitor.id, monitor.url)
+      .catch(() => {
+        /* logged inside the service */
+      });
+    this.scheduler
+      .refreshGeoForMonitor(monitor.id, monitor.url)
+      .catch(() => {
+        /* logged inside the service */
+      });
 
     return monitor;
   }
@@ -130,5 +146,25 @@ export class MonitorsService {
       orderBy: { startTime: 'desc' },
       take: 20,
     });
+  }
+
+  /**
+   * Sends a test notification email to the logged-in user with the monitor's
+   * current status and check details.
+   */
+  async sendTestNotification(userId: string, monitorId: string) {
+    const monitor = await this.prisma.monitor.findUnique({
+      where: { id: monitorId },
+    });
+    if (!monitor) throw new NotFoundException('Monitor not found');
+    if (monitor.userId !== userId) throw new ForbiddenException();
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user?.email) {
+      throw new NotFoundException('User has no email on file');
+    }
+
+    await this.alerts.sendTestNotification(monitor, user.email);
+    return { sent: true, to: user.email };
   }
 }

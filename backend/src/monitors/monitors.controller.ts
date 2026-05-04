@@ -75,4 +75,9 @@ export class MonitorsController {
   getIncidents(@Request() req: any, @Param('id') id: string) {
     return this.monitorsService.getIncidents(req.user.sub, id);
   }
+
+  @Post(':id/test-notification')
+  testNotification(@Request() req: any, @Param('id') id: string) {
+    return this.monitorsService.sendTestNotification(req.user.sub, id);
+  }
 }

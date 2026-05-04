@@ -8,7 +8,7 @@ import { Footer } from '@/components/landing/Footer';
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-[#030303] text-white overflow-hidden selection:bg-violet-500/30">
+    <main className="min-h-screen bg-[#030303] text-white overflow-hidden isolate selection:bg-violet-500/30">
       <Background />
       <Nav />
       <Hero />

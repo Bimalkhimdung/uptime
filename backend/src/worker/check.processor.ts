@@ -5,6 +5,24 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AlertsService } from '../alerts/alerts.service';
 import * as https from 'https';
 import * as http from 'http';
+import * as tls from 'tls';
+
+type CheckResult = {
+  status: 'UP' | 'DOWN';
+  statusCode?: number;
+  responseTime?: number;
+  error?: string;
+  domainResolved?: boolean;
+  ssl?: SslInfo | null;
+};
+
+type SslInfo = {
+  validFrom: Date;
+  validUntil: Date;
+  daysLeft: number;
+  issuer: string | null;
+  valid: boolean;
+};
 
 @Injectable()
 @Processor('monitor-checks')
@@ -31,8 +49,7 @@ export class CheckProcessor extends WorkerHost {
 
     this.logger.debug(`Checking monitor: ${monitor.name} (${monitor.url})`);
 
-    // Retry loop to avoid false positives
-    let lastResult: { status: 'UP' | 'DOWN'; statusCode?: number; responseTime?: number; error?: string } | null = null;
+    let lastResult: CheckResult | null = null;
 
     for (let attempt = 0; attempt <= this.MAX_RETRIES; attempt++) {
       lastResult = await this.performCheck(monitor.url, monitor.timeout * 1000);
@@ -45,7 +62,6 @@ export class CheckProcessor extends WorkerHost {
 
     if (!lastResult) return;
 
-    // Save check result
     await this.prisma.check.create({
       data: {
         monitorId: monitor.id,
@@ -59,7 +75,6 @@ export class CheckProcessor extends WorkerHost {
     const previousStatus = monitor.status;
     const newStatus = lastResult.status;
 
-    // Update monitor status and stats
     const recentChecks = await this.prisma.check.findMany({
       where: { monitorId },
       orderBy: { checkedAt: 'desc' },
@@ -67,6 +82,18 @@ export class CheckProcessor extends WorkerHost {
     });
     const upCount = recentChecks.filter((c) => c.status === 'UP').length;
     const uptimePercent = (upCount / recentChecks.length) * 100;
+
+    const ssl = lastResult.ssl;
+    const sslPatch = ssl
+      ? {
+          sslValidFrom: ssl.validFrom,
+          sslValidUntil: ssl.validUntil,
+          sslIssuer: ssl.issuer,
+          sslDaysLeft: ssl.daysLeft,
+          sslValid: ssl.valid,
+          sslLastCheckedAt: new Date(),
+        }
+      : {};
 
     await this.prisma.monitor.update({
       where: { id: monitorId },
@@ -76,29 +103,24 @@ export class CheckProcessor extends WorkerHost {
         lastStatusCode: lastResult.statusCode,
         lastResponseTime: lastResult.responseTime,
         uptimePercent: Math.round(uptimePercent * 100) / 100,
+        domainResolved: lastResult.domainResolved ?? null,
+        ...sslPatch,
       },
     });
 
-    // Handle status transitions
     if (previousStatus !== 'DOWN' && newStatus === 'DOWN') {
       this.logger.warn(`🔴 DOWN: ${monitor.name} (${monitor.url})`);
 
-      // Create incident
       await this.prisma.incident.create({
-        data: {
-          monitorId,
-          errorMessage: lastResult.error,
-        },
+        data: { monitorId, errorMessage: lastResult.error },
       });
 
-      // Send alerts
       for (const contact of monitor.alertContacts) {
         await this.alerts.sendDownAlert(monitor, contact, lastResult.error);
       }
     } else if (previousStatus === 'DOWN' && newStatus === 'UP') {
       this.logger.log(`🟢 RECOVERED: ${monitor.name} (${monitor.url})`);
 
-      // Resolve open incident
       const openIncident = await this.prisma.incident.findFirst({
         where: { monitorId, resolved: false },
         orderBy: { startTime: 'desc' },
@@ -113,7 +135,6 @@ export class CheckProcessor extends WorkerHost {
         });
       }
 
-      // Send recovery alerts
       for (const contact of monitor.alertContacts) {
         await this.alerts.sendRecoveryAlert(monitor, contact);
       }
@@ -123,33 +144,42 @@ export class CheckProcessor extends WorkerHost {
   private async performCheck(
     url: string,
     timeoutMs: number,
-  ): Promise<{ status: 'UP' | 'DOWN'; statusCode?: number; responseTime?: number; error?: string }> {
+  ): Promise<CheckResult> {
     const start = Date.now();
+    const isHttps = url.startsWith('https');
+    const lib = isHttps ? https : http;
 
     return new Promise((resolve) => {
-      const isHttps = url.startsWith('https');
-      const lib = isHttps ? https : http;
-
       const req = lib.get(
         url,
         {
           timeout: timeoutMs,
           headers: { 'User-Agent': 'UptimeMonitor/1.0' },
+          // Inspect even invalid certs so we can report on them
+          ...(isHttps ? { rejectUnauthorized: false } : {}),
         },
         (res) => {
           const responseTime = Date.now() - start;
-          res.resume(); // consume response data
-          const statusCode = res.statusCode || 0;
-          if (statusCode >= 200 && statusCode < 400) {
-            resolve({ status: 'UP', statusCode, responseTime });
-          } else {
-            resolve({
-              status: 'DOWN',
-              statusCode,
-              responseTime,
-              error: `HTTP ${statusCode}`,
-            });
+
+          let ssl: SslInfo | null = null;
+          if (isHttps) {
+            const socket = res.socket as tls.TLSSocket | undefined;
+            if (socket && typeof socket.getPeerCertificate === 'function') {
+              ssl = parseCert(socket.getPeerCertificate(), socket.authorized);
+            }
           }
+
+          res.resume();
+          const statusCode = res.statusCode || 0;
+          const ok = statusCode >= 200 && statusCode < 400;
+          resolve({
+            status: ok ? 'UP' : 'DOWN',
+            statusCode,
+            responseTime,
+            error: ok ? undefined : `HTTP ${statusCode}`,
+            domainResolved: true,
+            ssl,
+          });
         },
       );
 
@@ -158,8 +188,13 @@ export class CheckProcessor extends WorkerHost {
         resolve({ status: 'DOWN', error: `Timeout after ${timeoutMs}ms` });
       });
 
-      req.on('error', (err) => {
-        resolve({ status: 'DOWN', error: err.message });
+      req.on('error', (err: NodeJS.ErrnoException) => {
+        const dnsErr = err.code === 'ENOTFOUND' || err.code === 'EAI_AGAIN';
+        resolve({
+          status: 'DOWN',
+          error: err.message,
+          domainResolved: dnsErr ? false : undefined,
+        });
       });
     });
   }
@@ -167,4 +202,30 @@ export class CheckProcessor extends WorkerHost {
   private sleep(ms: number) {
     return new Promise((r) => setTimeout(r, ms));
   }
+}
+
+function parseCert(
+  cert: tls.PeerCertificate | tls.DetailedPeerCertificate | Record<string, never>,
+  authorized: boolean,
+): SslInfo | null {
+  if (!cert || Object.keys(cert).length === 0) return null;
+  const { valid_from, valid_to, issuer } = cert as tls.PeerCertificate;
+  if (!valid_to) return null;
+
+  const validFrom = new Date(valid_from);
+  const validUntil = new Date(valid_to);
+  const now = Date.now();
+  const daysLeft = Math.floor((validUntil.getTime() - now) / 86_400_000);
+  const issuerStr =
+    typeof issuer === 'object' && issuer
+      ? (issuer.O || issuer.CN || JSON.stringify(issuer)).toString()
+      : null;
+
+  return {
+    validFrom,
+    validUntil,
+    issuer: issuerStr,
+    daysLeft,
+    valid: authorized && validUntil.getTime() > now,
+  };
 }

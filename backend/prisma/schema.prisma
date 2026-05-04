@@ -14,7 +14,8 @@ model User {
   id        String    @id @default(uuid())
   email     String    @unique
   username  String?   @unique
-  password  String
+  googleId  String?   @unique
+  password  String?
   name      String?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -35,6 +36,27 @@ model Monitor {
   lastStatusCode  Int?
   lastResponseTime Int?       // ms
   uptimePercent   Float       @default(100)
+  // SSL / domain
+  sslValidFrom     DateTime?
+  sslValidUntil    DateTime?
+  sslIssuer        String?
+  sslDaysLeft      Int?
+  sslValid         Boolean?   // false if cert is expired or hostname mismatch
+  sslLastCheckedAt DateTime?
+  domainResolved      Boolean?   // false on ENOTFOUND / EAI_AGAIN
+  domainExpiresAt     DateTime?
+  domainRegistrar     String?
+  domainDaysLeft      Int?
+  domainLastCheckedAt DateTime?
+  // Server geolocation (resolved from hostname → IP → geo)
+  serverIp            String?
+  serverLat           Float?
+  serverLng           Float?
+  serverCountry       String?
+  serverCountryCode   String?
+  serverRegion        String?
+  serverCity          String?
+  serverGeoCheckedAt  DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   checks          Check[]

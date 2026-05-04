@@ -58,6 +58,11 @@ export const api = {
     checks: (id: string, limit = 50) =>
       request<any[]>(`/monitors/${id}/checks?limit=${limit}`),
     incidents: (id: string) => request<any[]>(`/monitors/${id}/incidents`),
+    testNotification: (id: string) =>
+      request<{ sent: boolean; to: string }>(
+        `/monitors/${id}/test-notification`,
+        { method: 'POST' },
+      ),
   },
 
   incidents: {
