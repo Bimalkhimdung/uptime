@@ -3,24 +3,28 @@ import { useState } from 'react';
 
 const FAQS = [
   {
-    question: "What is Uptime?",
-    answer: "Uptime is a high-performance monitoring platform designed to keep track of your websites and APIs. It checks your services at regular intervals and alerts you immediately if something goes wrong."
+    question: "What is Uptime and Sitemonitor?",
+    answer: "Uptime (featuring Sitemonitor technology) is a high-performance monitoring platform and professional monitor tool designed to keep track of your websites and APIs. It checks your services at regular intervals and alerts you immediately if something goes wrong."
   },
   {
-    question: "How to start monitoring?",
-    answer: "Getting started is simple. Once you sign up, you'll be taken to your dashboard where you can see all your monitors. If you're new, you'll start with a clean slate ready for your first target."
+    question: "How to start monitoring with Sitemonitor?",
+    answer: "Getting started with our monitor tool is simple. Once you sign up, you'll be taken to your dashboard where you can see all your monitors. If you're new, you'll start with a clean slate ready for your first Sitemonitor target."
   },
   {
-    question: "How to create a new monitor?",
-    answer: "Click the 'New' button in your dashboard. Enter the URL of the service you want to monitor, give it a name, and set the check interval. We'll handle the rest, checking your service from multiple regions around the world."
+    question: "How to set up a Homepage Sitemonitor?",
+    answer: "To create a Homepage Sitemonitor, click the 'New' button in your dashboard. Enter your homepage URL, give it a name, and set the check interval. We'll handle the rest, checking your service from multiple regions around the world."
   },
   {
-    question: "How to add alert contacts?",
-    answer: "You can configure alert contacts within each monitor's settings. Currently, we support email notifications, and we're rapidly adding support for Slack, Discord, and Webhooks."
+    question: "Does Uptime offer Sitemonitor Enterprise solutions?",
+    answer: "Yes, our Sitemonitor Enterprise plan is engineered for large-scale operations requiring high-frequency checks and advanced multi-location testing. It's the definitive monitor tool for mission-critical services."
   },
   {
-    question: "How to analyze performance?",
-    answer: "Each monitor has a detailed view where you can see response time graphs, uptime percentages, and incident history. This helps you identify trends and optimize your service performance."
+    question: "How to add alert contacts to my monitor tool?",
+    answer: "You can configure alert contacts within each Sitemonitor's settings. Currently, we support email notifications, and we're rapidly adding support for Slack, Discord, and Webhooks."
+  },
+  {
+    question: "How to analyze performance with Sitemonitor?",
+    answer: "Each monitor tool has a detailed view where you can see response time graphs, uptime percentages, and incident history. This helps you identify trends and optimize your Sitemonitor performance."
   }
 ];
 
