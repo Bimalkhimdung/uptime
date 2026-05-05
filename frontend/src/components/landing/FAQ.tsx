@@ -59,8 +59,8 @@ export function FAQ() {
                   </svg>
                 </span>
               </button>
-              
-              <div 
+
+              <div
                 className={`overflow-hidden transition-all duration-500 ease-in-out ${openIndex === i ? 'max-h-96 pb-8 opacity-100' : 'max-h-0 opacity-0'}`}
               >
                 <p className="text-lg text-slate-400 leading-relaxed font-medium max-w-3xl">

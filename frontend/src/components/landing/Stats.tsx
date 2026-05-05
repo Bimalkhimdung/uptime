@@ -38,9 +38,8 @@ export function Stats() {
         {FEATURES.map((feat, i) => (
           <div
             key={feat.title}
-            className={`bg-white/[0.02] border border-white/5 rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 text-center hover:bg-white/[0.04] transition-all duration-700 hover:border-white/10 group ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-            }`}
+            className={`bg-white/[0.02] border border-white/5 rounded-none p-8 md:p-10 text-center hover:bg-white/[0.04] transition-all duration-2000 hover:border-emerald-500/20 hover:shadow-[0_0_40px_rgba(52,211,153,0.1)] group ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+              }`}
             style={{ transitionDelay: `${i * 100}ms` }}
           >
             <div className="text-3xl md:text-4xl mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500">

@@ -10,15 +10,15 @@ export function Hero() {
           Real-time Monitoring
         </div>
 
-        <h1 className="text-4xl sm:text-5xl md:text-8xl font-black tracking-tight mb-8 leading-[1.1] md:leading-[1.05] bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
-          Uptime monitoring <br />
+        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black tracking-tight mb-8 leading-[1.1] md:leading-[1.05] bg-gradient-to-b from-white to-white/60 bg-clip-text text-transparent">
+          Uptime Site-Monitoring <br />
           <span className="bg-gradient-to-r from-violet-400 via-indigo-400 to-emerald-400 bg-clip-text text-transparent italic">
             done right.
           </span>
         </h1>
 
         <p className="text-slate-400 text-base md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-medium">
-          Stop losing customers to downtime. Get notified instantly when your site goes down with beautiful reports and global checks.
+          20+ million page views monitored. 10,000+ websites protected.
         </p>
 
         {/* Dashboard Screenshot Graphic */}

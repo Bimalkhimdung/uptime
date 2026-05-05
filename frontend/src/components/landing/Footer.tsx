@@ -38,6 +38,8 @@ export function Footer() {
         'SSL monitoring',
         'Domain monitoring',
         'DNS monitoring',
+        { label: 'StyledText', href: 'https://www.styledtext.com/' },
+        { label: 'White screen', href: 'https://www.whitescreenhd.com/' },
       ],
     },
     {
@@ -95,16 +97,25 @@ export function Footer() {
                 {section.title}<span className="text-emerald-400">.</span>
               </h4>
               <ul className="space-y-4">
-                {section.links.map((link) => (
-                  <li key={link}>
-                    <Link
-                      href="#"
-                      className="text-slate-500 hover:text-emerald-400 transition-colors text-sm font-medium"
-                    >
-                      {link}
-                    </Link>
-                  </li>
-                ))}
+                {section.links.map((link) => {
+                  const isObject = typeof link === 'object';
+                  const label = isObject ? link.label : (link as string);
+                  const href = isObject ? link.href : '#';
+                  const isExternal = isObject && link.href.startsWith('http');
+
+                  return (
+                    <li key={label}>
+                      <Link
+                        href={href}
+                        target={isExternal ? '_blank' : undefined}
+                        rel={isExternal ? 'noopener noreferrer' : undefined}
+                        className="text-slate-500 hover:text-emerald-400 transition-colors text-sm font-medium"
+                      >
+                        {label}
+                      </Link>
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

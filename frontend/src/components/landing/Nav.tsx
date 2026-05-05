@@ -5,9 +5,7 @@ export function Nav() {
     <nav className="fixed top-0 left-0 right-0 z-[100] bg-[#030303]/70 backdrop-blur-xl border-b border-white/5">
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-500/20 group-hover:scale-105 transition-transform">
-            <span className="font-black text-white text-sm">U</span>
-          </div>
+          <div className="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]" />
           <span className="font-bold text-lg tracking-tight text-white/90">Uptime</span>
         </Link>
 

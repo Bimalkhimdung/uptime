@@ -21,7 +21,7 @@ export function Logos() {
         <p className="text-[10px] uppercase tracking-[0.3em] font-bold text-slate-500 mb-8 opacity-50">
           Trusted by innovators worldwide
         </p>
-        
+
         <div className="relative w-full overflow-hidden">
           {/* Gradient Masks */}
           <div className="absolute inset-y-0 left-0 w-32 bg-gradient-to-r from-[#030303] to-transparent z-10" />
@@ -29,8 +29,8 @@ export function Logos() {
 
           <div className="flex gap-8 md:gap-16 items-center animate-marquee whitespace-nowrap">
             {displayLogos.map((logo, i) => (
-              <div 
-                key={i} 
+              <div
+                key={i}
                 className="flex items-center gap-3 grayscale opacity-30 hover:grayscale-0 hover:opacity-100 transition-all duration-500 cursor-default group"
               >
                 <span className="text-2xl group-hover:scale-110 transition-transform">{logo.icon}</span>
