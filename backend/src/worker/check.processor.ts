@@ -29,6 +29,7 @@ type SslInfo = {
 export class CheckProcessor extends WorkerHost {
   private readonly logger = new Logger(CheckProcessor.name);
   private readonly MAX_RETRIES = 2;
+  private readonly DOWN_ALERT_REPEAT_MS = 60 * 60 * 1000; // 1 hour
 
   constructor(
     private prisma: PrismaService,
@@ -95,20 +96,38 @@ export class CheckProcessor extends WorkerHost {
         }
       : {};
 
+    const now = new Date();
+    const isDownEdge = previousStatus !== 'DOWN' && newStatus === 'DOWN';
+    const isRecoveryEdge = previousStatus === 'DOWN' && newStatus === 'UP';
+    const lastDownAlertAt = monitor.lastDownAlertAt;
+    const isDownRepeat =
+      previousStatus === 'DOWN' &&
+      newStatus === 'DOWN' &&
+      (!lastDownAlertAt ||
+        now.getTime() - lastDownAlertAt.getTime() >= this.DOWN_ALERT_REPEAT_MS);
+
+    let lastDownAlertPatch: { lastDownAlertAt: Date | null } | object = {};
+    if (isDownEdge || isDownRepeat) {
+      lastDownAlertPatch = { lastDownAlertAt: now };
+    } else if (isRecoveryEdge) {
+      lastDownAlertPatch = { lastDownAlertAt: null };
+    }
+
     await this.prisma.monitor.update({
       where: { id: monitorId },
       data: {
         status: newStatus,
-        lastCheckedAt: new Date(),
+        lastCheckedAt: now,
         lastStatusCode: lastResult.statusCode,
         lastResponseTime: lastResult.responseTime,
         uptimePercent: Math.round(uptimePercent * 100) / 100,
         domainResolved: lastResult.domainResolved ?? null,
         ...sslPatch,
+        ...lastDownAlertPatch,
       },
     });
 
-    if (previousStatus !== 'DOWN' && newStatus === 'DOWN') {
+    if (isDownEdge) {
       this.logger.warn(`🔴 DOWN: ${monitor.name} (${monitor.url})`);
 
       await this.prisma.incident.create({
@@ -118,7 +137,15 @@ export class CheckProcessor extends WorkerHost {
       for (const contact of monitor.alertContacts) {
         await this.alerts.sendDownAlert(monitor, contact, lastResult.error);
       }
-    } else if (previousStatus === 'DOWN' && newStatus === 'UP') {
+    } else if (isDownRepeat) {
+      this.logger.warn(
+        `🔁 DOWN reminder (still down): ${monitor.name} (${monitor.url})`,
+      );
+
+      for (const contact of monitor.alertContacts) {
+        await this.alerts.sendDownAlert(monitor, contact, lastResult.error);
+      }
+    } else if (isRecoveryEdge) {
       this.logger.log(`🟢 RECOVERED: ${monitor.name} (${monitor.url})`);
 
       const openIncident = await this.prisma.incident.findFirst({
@@ -131,7 +158,7 @@ export class CheckProcessor extends WorkerHost {
         );
         await this.prisma.incident.update({
           where: { id: openIncident.id },
-          data: { resolved: true, endTime: new Date(), duration },
+          data: { resolved: true, endTime: now, duration },
         });
       }
 

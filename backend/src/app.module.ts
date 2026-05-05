@@ -11,6 +11,10 @@ import { IncidentsModule } from './incidents/incidents.module';
 import { WorkerModule } from './worker/worker.module';
 import { SchedulerModule } from './scheduler/scheduler.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { SitesModule } from './sites/sites.module';
+import { SeoModule } from './seo/seo.module';
+import { GoogleAuthModule } from './google-auth/google-auth.module';
+import { AnalyticsModule } from './analytics/analytics.module';
 
 @Module({
   imports: [
@@ -31,6 +35,10 @@ import { AlertsModule } from './alerts/alerts.module';
     WorkerModule,
     SchedulerModule,
     AlertsModule,
+    SeoModule,
+    GoogleAuthModule,
+    AnalyticsModule,
+    SitesModule,
   ],
 })
 export class AppModule {}

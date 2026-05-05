@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TestNotificationModal } from '@/components/dashboard/TestNotificationModal';
 import { RegionMap } from '@/components/dashboard/RegionMap';
+import EditMonitorModal from '@/components/EditMonitorModal';
 
 function StatusBadge({ status }: { status: string }) {
   const map: Record<string, { dot: string; text: string; bg: string; label: string }> = {
@@ -218,6 +219,7 @@ export default function MonitorDetailPage() {
   const [incidents, setIncidents] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
   const [showTestModal, setShowTestModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -304,7 +306,7 @@ export default function MonitorDetailPage() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="10" y1="15" x2="10" y2="9"></line><line x1="14" y1="15" x2="14" y2="9"></line></svg>
             {monitor.isActive ? 'Pause' : 'Resume'}
           </button>
-          <button className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
+          <button onClick={() => setShowEditModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             Edit
           </button>
@@ -513,6 +515,18 @@ export default function MonitorDetailPage() {
           monitorName={monitor.name}
           userEmail={user.email}
           onClose={() => setShowTestModal(false)}
+        />
+      )}
+
+      {showEditModal && (
+        <EditMonitorModal
+          monitor={monitor}
+          onClose={() => setShowEditModal(false)}
+          onSaved={async () => {
+            const updated = await api.monitors.get(id);
+            setMonitor(updated);
+            setShowEditModal(false);
+          }}
         />
       )}
     </div>

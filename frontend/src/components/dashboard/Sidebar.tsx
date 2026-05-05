@@ -9,6 +9,7 @@ import {
   MaintenanceIcon,
   TeamIcon,
   IntegrationsIcon,
+  SeoIcon,
   ChevronLeftIcon,
   MoreIcon,
 } from './icons';
@@ -24,6 +25,7 @@ type NavItem = {
 const NAV: NavItem[] = [
   { label: 'Monitoring', href: '/dashboard', icon: MonitoringIcon, matches: ['/dashboard', '/monitors'] },
   { label: 'Incidents', href: '/incidents', icon: IncidentsIcon },
+  { label: 'SEO', href: '/seo', icon: SeoIcon },
   { label: 'Status pages', href: '#', icon: StatusPagesIcon },
   { label: 'Maintenance', href: '#', icon: MaintenanceIcon },
   { label: 'Team members', href: '#', icon: TeamIcon },

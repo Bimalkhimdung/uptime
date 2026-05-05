@@ -68,4 +68,49 @@ export const api = {
   incidents: {
     list: () => request<any[]>('/incidents'),
   },
+
+  sites: {
+    list: () => request<any[]>('/sites'),
+    get: (id: string) => request<any>(`/sites/${id}`),
+    create: (data: { name?: string; url: string }) =>
+      request<any>('/sites', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: { name?: string; url?: string; gaPropertyId?: string | null },
+    ) =>
+      request<any>(`/sites/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+    delete: (id: string) =>
+      request<any>(`/sites/${id}`, { method: 'DELETE' }),
+    refreshSeo: (id: string) =>
+      request<any>(`/sites/${id}/seo/refresh`, { method: 'POST' }),
+    analytics: (id: string) => request<any>(`/sites/${id}/analytics`),
+  },
+
+  google: {
+    status: () =>
+      request<{
+        configured: boolean;
+        connected: boolean;
+        email: string | null;
+        connectedAt: string | null;
+      }>('/integrations/google/status'),
+    connect: () =>
+      request<{ url: string }>('/integrations/google/connect'),
+    disconnect: () =>
+      request<{ ok: boolean }>('/integrations/google/disconnect', {
+        method: 'DELETE',
+      }),
+    properties: () =>
+      request<
+        Array<{
+          property: string;
+          displayName: string;
+          account: string | null;
+          accountDisplayName: string | null;
+        }>
+      >('/google/analytics/properties'),
+  },
 };

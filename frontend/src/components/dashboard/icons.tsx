@@ -68,6 +68,16 @@ export function IntegrationsIcon(props: SVGProps<SVGSVGElement>) {
   );
 }
 
+export function SeoIcon(props: SVGProps<SVGSVGElement>) {
+  return (
+    <svg {...base} {...props}>
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.35-4.35" />
+      <path d="M11 7v4l3 2" />
+    </svg>
+  );
+}
+
 export function ChevronLeftIcon(props: SVGProps<SVGSVGElement>) {
   return (
     <svg {...base} {...props}>

@@ -91,9 +91,35 @@ export class MonitorsService {
     if (!monitor) throw new NotFoundException('Monitor not found');
     if (monitor.userId !== userId) throw new ForbiddenException();
 
-    return this.prisma.monitor.update({
-      where: { id },
-      data: dto,
+    const { alertEmails, ...rest } = dto;
+
+    return this.prisma.$transaction(async (tx) => {
+      if (Object.keys(rest).length > 0) {
+        await tx.monitor.update({ where: { id }, data: rest });
+      }
+
+      if (alertEmails !== undefined) {
+        const cleaned = Array.from(
+          new Set(alertEmails.map((e) => e.trim()).filter(Boolean)),
+        );
+        await tx.alertContact.deleteMany({
+          where: { monitorId: id, type: 'EMAIL' },
+        });
+        if (cleaned.length > 0) {
+          await tx.alertContact.createMany({
+            data: cleaned.map((value) => ({
+              monitorId: id,
+              type: 'EMAIL' as const,
+              value,
+            })),
+          });
+        }
+      }
+
+      return tx.monitor.findUnique({
+        where: { id },
+        include: { alertContacts: true },
+      });
     });
   }
 

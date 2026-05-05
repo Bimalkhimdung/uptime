@@ -1,9 +1,11 @@
 import { Background } from '@/components/landing/Background';
 import { Nav } from '@/components/landing/Nav';
 import { Hero } from '@/components/landing/Hero';
+import { Logos } from '@/components/landing/Logos';
 import { Stats } from '@/components/landing/Stats';
 import { Features } from '@/components/landing/Features';
 import { CTA } from '@/components/landing/CTA';
+import { FAQ } from '@/components/landing/FAQ';
 import { Footer } from '@/components/landing/Footer';
 
 export default function HomePage() {
@@ -12,9 +14,11 @@ export default function HomePage() {
       <Background />
       <Nav />
       <Hero />
+      <Logos />
       <Stats />
       <Features />
       <CTA />
+      <FAQ />
       <Footer />
     </main>
   );

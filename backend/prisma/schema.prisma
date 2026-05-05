@@ -20,6 +20,13 @@ model User {
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   monitors  Monitor[]
+  sites     Site[]
+  // Google Analytics OAuth connection (read-only scope)
+  googleAccessToken     String?
+  googleRefreshToken    String?
+  googleTokenExpiresAt  DateTime?
+  googleConnectedAt     DateTime?
+  googleConnectedEmail  String?
 }
 
 model Monitor {
@@ -57,6 +64,8 @@ model Monitor {
   serverRegion        String?
   serverCity          String?
   serverGeoCheckedAt  DateTime?
+  // Last time a DOWN alert was sent. Used to throttle repeat alerts to once per hour while DOWN.
+  lastDownAlertAt DateTime?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
   checks          Check[]
@@ -113,4 +122,31 @@ enum AlertType {
   EMAIL
   SLACK
   WEBHOOK
+}
+
+model Site {
+  id            String        @id @default(uuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String?
+  url           String
+  // GA4 property in the form "properties/123456789" — null until the user picks one.
+  gaPropertyId  String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  seoSnapshot   SeoSnapshot?
+}
+
+model SeoSnapshot {
+  id         String   @id @default(uuid())
+  siteId     String   @unique
+  site       Site     @relation(fields: [siteId], references: [id], onDelete: Cascade)
+  fetchedAt  DateTime @default(now())
+  fetchOk    Boolean
+  fetchError String?
+  statusCode Int?
+  score      Int?
+  issueCount Int?
+  details    Json
+  updatedAt  DateTime @updatedAt
 }

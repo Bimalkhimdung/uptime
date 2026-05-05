@@ -6,6 +6,9 @@ import {
   Min,
   Max,
   IsBoolean,
+  IsArray,
+  IsEmail,
+  ArrayMaxSize,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -67,4 +70,16 @@ export class UpdateMonitorDto {
   @IsBoolean()
   @IsOptional()
   isActive?: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: [String],
+    description:
+      'When provided, replaces the monitor\'s email alert contacts with this list. Pass [] to remove all email contacts.',
+  })
+  @IsArray()
+  @IsEmail({}, { each: true })
+  @ArrayMaxSize(10)
+  @IsOptional()
+  alertEmails?: string[];
 }

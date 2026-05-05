@@ -4,12 +4,15 @@ import { api } from '@/lib/api';
 import AddMonitorModal from '@/components/AddMonitorModal';
 import { MonitorsEmptyState } from '@/components/dashboard/MonitorsEmptyState';
 import { MonitorRow } from '@/components/dashboard/MonitorRow';
+import { ConfirmModal } from '@/components/dashboard/ConfirmModal';
 import { PlusIcon, ChevronDownIcon } from '@/components/dashboard/icons';
 
 export default function DashboardPage() {
   const [monitors, setMonitors] = useState<any[]>([]);
   const [fetching, setFetching] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState<any | null>(null);
+  const [pendingPause, setPendingPause] = useState<any | null>(null);
 
   const loadMonitors = useCallback(async () => {
     try {
@@ -28,15 +31,31 @@ export default function DashboardPage() {
     return () => clearInterval(interval);
   }, [loadMonitors]);
 
-  const handleDelete = async (id: string) => {
-    if (!confirm('Delete this monitor?')) return;
-    await api.monitors.delete(id);
+  const handleDelete = (id: string) => {
+    const monitor = monitors.find((m) => m.id === id);
+    if (monitor) setPendingDelete(monitor);
+  };
+
+  const confirmDelete = async () => {
+    if (!pendingDelete) return;
+    await api.monitors.delete(pendingDelete.id);
+    setPendingDelete(null);
     loadMonitors();
   };
 
   const handleToggle = async (m: any) => {
-    if (m.isActive) await api.monitors.pause(m.id);
-    else await api.monitors.resume(m.id);
+    if (m.isActive) {
+      setPendingPause(m);
+      return;
+    }
+    await api.monitors.resume(m.id);
+    loadMonitors();
+  };
+
+  const confirmPause = async () => {
+    if (!pendingPause) return;
+    await api.monitors.pause(pendingPause.id);
+    setPendingPause(null);
     loadMonitors();
   };
 
@@ -93,6 +112,32 @@ export default function DashboardPage() {
             setShowAdd(false);
             loadMonitors();
           }}
+        />
+      )}
+
+      {pendingDelete && (
+        <ConfirmModal
+          intent="danger"
+          title="Delete monitor?"
+          description="This permanently removes the monitor and all its checks, incidents, and alert contacts. This action cannot be undone."
+          confirmLabel="Delete"
+          loadingLabel="Deleting…"
+          target={{ name: pendingDelete.name, url: pendingDelete.url }}
+          onCancel={() => setPendingDelete(null)}
+          onConfirm={confirmDelete}
+        />
+      )}
+
+      {pendingPause && (
+        <ConfirmModal
+          intent="warning"
+          title="Pause monitoring?"
+          description="Checks will stop running and you won't receive alerts for this monitor until you resume it."
+          confirmLabel="Pause"
+          loadingLabel="Pausing…"
+          target={{ name: pendingPause.name, url: pendingPause.url }}
+          onCancel={() => setPendingPause(null)}
+          onConfirm={confirmPause}
         />
       )}
     </>

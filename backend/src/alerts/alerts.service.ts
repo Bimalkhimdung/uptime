@@ -36,7 +36,7 @@ export class AlertsService {
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #6b7280;">Time</td>
-              <td style="padding: 8px 0; font-weight: bold;">${new Date().toUTCString()}</td>
+              <td style="padding: 8px 0; font-weight: bold;">${formatNpt(new Date())}</td>
             </tr>
             ${errorMessage ? `
             <tr>
@@ -75,7 +75,7 @@ export class AlertsService {
             </tr>
             <tr>
               <td style="padding: 8px 0; color: #6b7280;">Recovered at</td>
-              <td style="padding: 8px 0; font-weight: bold;">${new Date().toUTCString()}</td>
+              <td style="padding: 8px 0; font-weight: bold;">${formatNpt(new Date())}</td>
             </tr>
           </table>
           <p style="color: #6b7280; margin-top: 20px; font-size: 14px;">
@@ -100,14 +100,14 @@ export class AlertsService {
 
     const sslLine =
       monitor.sslValidUntil
-        ? `${new Date(monitor.sslValidUntil).toUTCString()} (${monitor.sslDaysLeft ?? '?'} days left, issuer: ${monitor.sslIssuer ?? '—'})`
+        ? `${formatNpt(monitor.sslValidUntil)} (${monitor.sslDaysLeft ?? '?'} days left, issuer: ${monitor.sslIssuer ?? '—'})`
         : 'Not collected yet';
     const domainLine =
       monitor.domainExpiresAt
-        ? `${new Date(monitor.domainExpiresAt).toUTCString()} (${monitor.domainDaysLeft ?? '?'} days left, registrar: ${monitor.domainRegistrar ?? '—'})`
+        ? `${formatNpt(monitor.domainExpiresAt)} (${monitor.domainDaysLeft ?? '?'} days left, registrar: ${monitor.domainRegistrar ?? '—'})`
         : 'Not collected yet';
     const lastCheckLine = monitor.lastCheckedAt
-      ? new Date(monitor.lastCheckedAt).toUTCString()
+      ? formatNpt(monitor.lastCheckedAt)
       : 'Never';
 
     const subject = `🧪 [TEST] ${monitor.name} — current status ${statusLabel}`;
@@ -182,4 +182,22 @@ function escapeHtml(s: string): string {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
+}
+
+function formatNpt(value: Date | string | null | undefined): string {
+  if (!value) return '—';
+  const d = value instanceof Date ? value : new Date(value);
+  if (Number.isNaN(d.getTime())) return '—';
+  return (
+    d.toLocaleString('en-GB', {
+      timeZone: 'Asia/Kathmandu',
+      year: 'numeric',
+      month: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: false,
+    }) + ' NPT'
+  );
 }
