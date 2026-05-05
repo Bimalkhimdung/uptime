@@ -38,6 +38,7 @@ export function Footer() {
         'SSL monitoring',
         'Domain monitoring',
         'DNS monitoring',
+        { label: 'NepseSignal', href: 'https://www.nepsesignal.com/' },
         { label: 'StyledText', href: 'https://www.styledtext.com/' },
         { label: 'White screen', href: 'https://www.whitescreenhd.com/' },
       ],
@@ -69,7 +70,7 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#030303] pt-24 pb-12 px-6 border-t border-white/5 font-sans">
+    <footer className="bg-[#0a1110] pt-24 pb-12 px-6 border-t border-white/5 font-sans">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-y-16 gap-x-8">
           {/* Logo Section */}

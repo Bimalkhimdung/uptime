@@ -6,7 +6,7 @@
 
 body {
   font-family: var(--font-inter), system-ui, sans-serif;
-  background: #030303;
+  background: #0a1110; /* Dashboard-matching Background */
   color: #e2e8f0;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;

@@ -5,18 +5,18 @@ export function CTA() {
     <section className="py-40 px-6 relative overflow-hidden">
       {/* Background Mockup Decoration */}
       <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-40">
-        <div className="relative w-full max-w-6xl aspect-[16/10] bg-[#0a0a0b] border border-white/10 rounded-[3rem] rotate-[15deg] skew-x-[-10deg] scale-125 translate-y-32 blur-[2px] shadow-[0_50px_100px_rgba(0,0,0,0.5)]">
+        <div className="relative w-full max-w-6xl aspect-[16/10] bg-[#011a14] border border-emerald-900/30 rounded-[3rem] rotate-[15deg] skew-x-[-10deg] scale-125 translate-y-32 blur-[2px] shadow-[0_50px_100px_rgba(0,0,0,0.5)]">
           {/* Mock Dashboard Content */}
           <div className="p-8 h-full flex flex-col gap-8">
-            <div className="h-12 w-48 bg-white/5 rounded-xl" />
+            <div className="h-12 w-48 bg-emerald-900/20 rounded-xl" />
             <div className="flex-1 grid grid-cols-4 gap-6">
               <div className="col-span-1 space-y-4">
                 {[...Array(5)].map((_, i) => (
-                  <div key={i} className="h-10 w-full bg-white/5 rounded-lg" />
+                  <div key={i} className="h-10 w-full bg-emerald-900/20 rounded-lg" />
                 ))}
               </div>
-              <div className="col-span-3 bg-white/[0.02] rounded-3xl border border-white/5 p-8">
-                <div className="h-full w-full bg-gradient-to-t from-emerald-500/20 to-transparent rounded-2xl border-b-2 border-emerald-500/30" />
+              <div className="col-span-3 bg-emerald-900/10 rounded-3xl border border-emerald-800/20 p-8">
+                <div className="h-full w-full bg-gradient-to-t from-emerald-500/10 to-transparent rounded-2xl border-b-2 border-emerald-500/20" />
               </div>
             </div>
           </div>

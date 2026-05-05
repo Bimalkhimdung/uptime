@@ -66,42 +66,49 @@ export function Features() {
         {/* Marquee Container */}
         <div className="relative w-full overflow-hidden py-10">
           {/* Gradient Masks */}
-          <div className="absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-[#030303] to-transparent z-20 pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-[#030303] to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-[#0a1110] to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-[#0a1110] to-transparent z-20 pointer-events-none" />
 
-          <div className="flex gap-6 animate-marquee px-6 w-max">
+          <div className="flex gap-10 animate-marquee px-6 w-max py-10">
             {displayReviews.map((review, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[300px] md:w-[400px] group relative bg-white/[0.02] border border-white/5 rounded-none p-8 md:p-10 overflow-hidden hover:bg-white/[0.04] transition-all duration-500 hover:border-emerald-500/20 hover:shadow-[0_0_40px_rgba(52,211,153,0.1)]"
+                className="flex-shrink-0 w-[400px] md:w-[550px] group relative bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-12 overflow-hidden hover:bg-white/[0.06] transition-all duration-700 hover:border-emerald-500/30 hover:shadow-[0_30px_70px_-20px_rgba(16,185,129,0.3)] backdrop-blur-md"
               >
                 <div
-                  className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${review.color} blur-[100px] opacity-0 group-hover:opacity-20 transition-opacity duration-500`}
+                  className={`absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br ${review.color} blur-[80px] opacity-10 group-hover:opacity-30 transition-opacity duration-700`}
                 />
 
                 <div className="relative z-10">
-                  <div className="flex items-center gap-4 mb-8">
-                    <div className={`w-12 h-12 rounded-full overflow-hidden bg-gradient-to-br ${review.color} flex items-center justify-center text-black font-black text-xs shrink-0`}>
+                  <div className="flex items-center gap-5 mb-10">
+                    <div className={`w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br ${review.color} flex items-center justify-center text-black font-black text-sm shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
                       {review.avatar.startsWith('http') ? (
                         <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
                       ) : (
-                        review.avatar
+                        review.avatar || review.name.charAt(0)
                       )}
                     </div>
                     <div>
-                      <h4 className="text-white font-bold text-base">{review.name}</h4>
-                      <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest">{review.role}</p>
+                      <h4 className="text-white font-bold text-lg tracking-tight group-hover:text-emerald-400 transition-colors duration-500">{review.name}</h4>
+                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{review.role}</p>
                     </div>
                   </div>
 
-                  <p className="text-slate-300 text-lg leading-relaxed font-medium italic mb-6">
-                    &quot;{review.text}&quot;
-                  </p>
+                  <div className="mb-10 relative">
+                    <span className="absolute -top-4 -left-4 text-emerald-500/20 text-6xl font-serif">"</span>
+                    <p className="text-slate-200 text-xl leading-relaxed font-medium italic relative z-10">
+                      {review.text}
+                    </p>
+                  </div>
 
-                  <div className="flex gap-1">
-                    {[...Array(5)].map((_, star) => (
-                      <span key={star} className="text-emerald-400 text-sm">★</span>
-                    ))}
+                  <div className="flex items-center justify-between mt-auto">
+                    <div className="flex gap-1.5">
+                      {[...Array(5)].map((_, star) => (
+                        <span key={star} className="text-emerald-400 text-lg drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">★</span>
+                      ))}
+                    </div>
+                    <div className="h-px flex-grow mx-4 bg-white/5" />
+                    <div className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">Verified Review</div>
                   </div>
                 </div>
               </div>

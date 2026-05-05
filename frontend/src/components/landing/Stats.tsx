@@ -35,22 +35,46 @@ export function Stats() {
   return (
     <section ref={sectionRef} className="py-20 px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {FEATURES.map((feat, i) => (
-          <div
-            key={feat.title}
-            className={`bg-white/[0.02] border border-white/5 rounded-none p-8 md:p-10 text-center hover:bg-white/[0.04] transition-all duration-2000 hover:border-emerald-500/20 hover:shadow-[0_0_40px_rgba(52,211,153,0.1)] group ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
-              }`}
-            style={{ transitionDelay: `${i * 100}ms` }}
-          >
-            <div className="text-3xl md:text-4xl mb-6 md:mb-8 group-hover:scale-110 transition-transform duration-500">
-              {feat.icon}
+        {FEATURES.map((feat, i) => {
+          const CardContent = (
+            <>
+              <div className="relative mb-8 inline-block">
+                <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700" />
+                <div className="text-4xl md:text-5xl relative z-10 group-hover:scale-110 transition-transform duration-500 filter drop-shadow-md">
+                  {feat.icon}
+                </div>
+              </div>
+              <h3 className="text-2xl font-bold text-white mb-4 tracking-tight group-hover:text-emerald-400 transition-colors duration-500 italic">{feat.title}</h3>
+              <p className="text-slate-400 text-lg font-medium leading-relaxed group-hover:text-slate-300 transition-colors duration-500">
+                {feat.desc}
+              </p>
+            </>
+          );
+
+          const className = `bg-white/[0.03] border border-white/10 rounded-3xl p-8 md:p-10 text-center hover:bg-white/[0.06] transition-all duration-700 hover:border-emerald-500/30 hover:shadow-[0_20px_50px_-20px_rgba(16,185,129,0.2)] group backdrop-blur-sm ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
+            }`;
+
+          return feat.href ? (
+            <a
+              key={feat.title}
+              href={feat.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={className}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              {CardContent}
+            </a>
+          ) : (
+            <div
+              key={feat.title}
+              className={className}
+              style={{ transitionDelay: `${i * 100}ms` }}
+            >
+              {CardContent}
             </div>
-            <h3 className="text-2xl font-bold text-white mb-4 italic tracking-tight">{feat.title}</h3>
-            <p className="text-slate-500 text-lg font-medium leading-relaxed">
-              {feat.desc}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

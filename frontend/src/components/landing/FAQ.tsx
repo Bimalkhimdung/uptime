@@ -32,28 +32,28 @@ export function FAQ() {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-32 px-6 relative border-t border-white/5">
+    <section className="py-32 px-6 relative border-t border-emerald-900/20">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-20">
           <h2 className="text-4xl md:text-5xl font-black text-white mb-4 italic tracking-tight">
-            Common Questions<span className="text-violet-500">.</span>
+            Common Questions<span className="text-emerald-500">.</span>
           </h2>
           <p className="text-slate-400 font-medium">
             Everything you need to know about our monitoring platform.
           </p>
         </div>
 
-        <div className="divide-y divide-white/5">
+        <div className="divide-y divide-emerald-900/20">
           {FAQS.map((faq, i) => (
             <div key={i} className="py-2">
               <button
                 onClick={() => setOpenIndex(openIndex === i ? null : i)}
                 className="w-full py-6 flex items-center justify-between text-left group"
               >
-                <span className="text-xl font-bold text-white italic tracking-tight group-hover:text-violet-400 transition-colors">
+                <span className="text-xl font-bold text-white italic tracking-tight group-hover:text-emerald-400 transition-colors">
                   {faq.question}
                 </span>
-                <span className={`text-slate-500 group-hover:text-violet-400 transition-all duration-300 ${openIndex === i ? 'rotate-45' : ''}`}>
+                <span className={`text-slate-500 group-hover:text-emerald-400 transition-all duration-300 ${openIndex === i ? 'rotate-45' : ''}`}>
                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                     <path d="M12 5v14M5 12h14" />
                   </svg>
