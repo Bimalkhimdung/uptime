@@ -1,45 +1,45 @@
 const REVIEWS = [
   {
-    name: "Alex Rivera",
+    name: "Bimal Rai",
     role: "Senior DevOps Engineer",
     text: "Uptime has completely changed how we handle site reliability. The instant notifications and global checks are top-tier.",
     color: "from-emerald-400 to-cyan-500",
-    avatar: "https://i.pinimg.com/474x/25/3a/bf/253abf4f1f4bc16b6dc04571f8d21624.jpg"
+    avatar: "https://avatars.githubusercontent.com/u/60500859?v=4"
   },
   {
-    name: "Sarah Chen",
+    name: "Tina Dhrub",
     role: "Fullstack Developer",
     text: "The cleanest UI I've ever used for monitoring. Setting up a new monitor takes seconds, and the SEO tool is a hidden gem.",
     color: "from-violet-400 to-fuchsia-500",
     avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTaHYJ_Ws1-IVS-xH06a2ma_EPTZWoLvz45aw&s"
   },
   {
-    name: "Marcus Thorne",
+    name: "Leo Maxwell",
     role: "Product Manager",
     text: "Reliable, fast, and beautiful. Our downtime decreased by 40% in the first month. Highly recommended for any scaling startup.",
     color: "from-amber-400 to-orange-500",
-    avatar: ""
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4pk9lXalaGtmocr9lhZFWaUITXeM8t2f2ew&s"
   },
   {
-    name: "Elena Rodriguez",
+    name: "Elena Chand",
     role: "CTO @ TechFlow",
     text: "The enterprise features are robust. We monitor over 500 endpoints and it's never missed a beat. Best investment this year.",
     color: "from-blue-400 to-indigo-500",
-    avatar: "ER"
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTmy-VCJ8HjJ2WGJ8YAYVEA4c4ih3kAMDWI1w&s"
   },
   {
-    name: "James Wilson",
+    name: "Rabindra Das",
     role: "Independent Indie Hacker",
     text: "As a solo dev, I need tools that just work. Uptime gives me peace of mind so I can focus on building my features.",
     color: "from-rose-400 to-red-500",
-    avatar: "JW"
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSxs-4NCrnwfOOlTNKZPN_dFEVspI6MYRsvIw&s"
   },
   {
-    name: "Akihiro Sato",
+    name: "Kamal Shrestha",
     role: "Backend Lead",
     text: "The API is fantastic for custom integrations. We've hooked it into our internal Slack bots seamlessly. Great documentation.",
     color: "from-lime-400 to-green-500",
-    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKSaw-O6mGkx-369PRX0slAXZ1iUDMwFVOPA&s"
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQSXrzSmTFySotdmQy5RPUqprwn6SwXOXSmqw&s"
   }
 ];
 

@@ -17,14 +17,12 @@ export function Footer() {
     },
     {
       title: 'Product',
-      links: ['Integrations', 'API', 'MCP', 'Roadmap', 'Status', 'Is it down?'],
+      links: ['Integrations', 'Monitoring', 'Status', 'Is it down?', 'Site Up Check', 'Port Up Check',],
     },
     {
       title: 'Company',
       links: [
         'Contact us',
-        'Affiliate program',
-        'Clients',
         'Non profits',
         'Terms / Privacy / DPA',
         'Security & compliance',
@@ -46,11 +44,10 @@ export function Footer() {
     {
       title: 'Comparison',
       links: [
-        'vs. Statuspage',
         'vs. BetterStack',
         'vs. Site24x7',
         'vs. Pingdom',
-        'vs. Uptime.com',
+        'vs. UptimeRobot'
       ],
     },
     {
@@ -60,11 +57,11 @@ export function Footer() {
     {
       title: 'Free tools',
       links: [
-        'Subnet calculator',
         'MX lookup',
         'Uptime calculator',
-        'CrontabRobot',
         'Web change detection',
+        { label: 'StyledText', href: 'https://www.styledtext.com/' },
+        { label: 'White screen', href: 'https://www.whitescreenhd.com/' },
       ],
     },
   ];
