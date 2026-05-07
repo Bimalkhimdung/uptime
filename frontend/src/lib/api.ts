@@ -69,6 +69,7 @@ export const api = {
 
   incidents: {
     list: () => request<any[]>('/incidents'),
+    get: (id: string) => request<any>(`/incidents/${id}`),
   },
 
   sites: {
