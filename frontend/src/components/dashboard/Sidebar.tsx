@@ -1,6 +1,7 @@
 'use client';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   MonitoringIcon,
@@ -10,8 +11,6 @@ import {
   TeamIcon,
   IntegrationsIcon,
   SeoIcon,
-  ChevronLeftIcon,
-  MoreIcon,
 } from './icons';
 import type { ComponentType, SVGProps } from 'react';
 
@@ -39,9 +38,29 @@ const ADMIN_NAV: NavItem[] = [
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const displayName = user?.name || user?.email?.split('@')[0] || 'User';
   const initial = displayName[0]?.toUpperCase() || 'U';
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handlePointer = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [menuOpen]);
 
   const isActive = (item: NavItem) => {
     const candidates = item.matches ?? [item.href];
@@ -104,39 +123,64 @@ export function Sidebar() {
         )}
       </nav>
 
-      <div className="p-4 space-y-3">
-        <div className="flex items-center gap-3 px-2 py-2">
+      <div className="p-4 relative" ref={menuRef}>
+        <button
+          type="button"
+          onClick={() => setMenuOpen((o) => !o)}
+          className={`w-full flex items-center gap-3 px-2 py-2 rounded-xl transition-colors ${
+            menuOpen ? 'bg-white/[0.04]' : 'hover:bg-white/[0.02]'
+          }`}
+          aria-haspopup="menu"
+          aria-expanded={menuOpen}
+        >
           <div className="w-9 h-9 rounded-full bg-white/5 border border-white/10 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
             {initial}
             <span className="text-emerald-400">.</span>
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 text-left">
             <p className="font-bold text-white truncate text-sm">{displayName}</p>
+            {user?.email && (
+              <p className="text-xs text-slate-500 truncate">{user.email}</p>
+            )}
           </div>
-          <button
-            onClick={logout}
-            title="Sign out"
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:text-white hover:bg-white/[0.04] transition-colors flex-shrink-0"
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={`text-slate-500 flex-shrink-0 transition-transform ${menuOpen ? 'rotate-180' : ''}`}
           >
-            <MoreIcon className="w-5 h-5" />
-          </button>
-        </div>
+            <polyline points="18 15 12 9 6 15" />
+          </svg>
+        </button>
 
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            title="Collapse"
-            className="w-10 h-10 rounded-full bg-white/[0.03] border border-white/5 flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/[0.06] transition-colors flex-shrink-0"
+        {menuOpen && (
+          <div
+            role="menu"
+            className="absolute bottom-full left-4 right-4 mb-2 bg-[#0f1816] border border-white/10 rounded-xl shadow-2xl overflow-hidden"
           >
-            <ChevronLeftIcon className="w-4 h-4" />
-          </button>
-          <button
-            type="button"
-            className="flex-1 bg-emerald-400 hover:bg-emerald-300 text-black font-bold px-4 py-3 rounded-2xl text-sm transition-colors"
-          >
-            Upgrade now
-          </button>
-        </div>
+            <button
+              type="button"
+              role="menuitem"
+              onClick={() => {
+                setMenuOpen(false);
+                logout();
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-200 hover:bg-white/[0.04] hover:text-red-400 transition-colors"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                <polyline points="16 17 21 12 16 7" />
+                <line x1="21" y1="12" x2="9" y2="12" />
+              </svg>
+              Sign out
+            </button>
+          </div>
+        )}
       </div>
     </aside>
   );
