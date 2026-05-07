@@ -7,10 +7,11 @@ export class AlertsService {
   private transporter: nodemailer.Transporter;
 
   constructor() {
+    const port = parseInt(process.env.SMTP_PORT || '587');
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
+      port,
+      secure: port === 465,
       auth: {
         user: process.env.SMTP_USER,
         pass: process.env.SMTP_PASS,
@@ -95,7 +96,7 @@ export class AlertsService {
     const isUp = monitor.status === 'UP';
     const isDown = monitor.status === 'DOWN';
     const statusColor = isUp ? '#22c55e' : isDown ? '#ef4444' : '#94a3b8';
-    const statusEmoji = isUp ? '🟢' : isDown ? '🔴' : '⚪️';
+    const statusEmoji = isUp ? '' : isDown ? '' : '';
     const statusLabel = monitor.status || 'PENDING';
 
     const sslLine =
@@ -110,7 +111,7 @@ export class AlertsService {
       ? formatNpt(monitor.lastCheckedAt)
       : 'Never';
 
-    const subject = `🧪 [TEST] ${monitor.name} — current status ${statusLabel}`;
+    const subject = `[TEST] ${monitor.name} — current status ${statusLabel}`;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: ${statusColor}; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
