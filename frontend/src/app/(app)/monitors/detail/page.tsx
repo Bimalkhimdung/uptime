@@ -1,8 +1,7 @@
 'use client';
-import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { Suspense, useEffect, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
-import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { TestNotificationModal } from '@/components/dashboard/TestNotificationModal';
@@ -198,7 +197,6 @@ function timeAgo(dateString: string | null) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-/** Renders a relative timestamp that re-computes every second so the user sees it tick. */
 function LiveTimeAgo({ dateString }: { dateString: string | null }) {
   const [, setTick] = useState(0);
   useEffect(() => {
@@ -209,10 +207,10 @@ function LiveTimeAgo({ dateString }: { dateString: string | null }) {
   return <>{timeAgo(dateString)}</>;
 }
 
-export default function MonitorDetailPage() {
+function MonitorDetailInner() {
   const { user } = useAuth();
-  const params = useParams();
-  const id = params.id as string;
+  const search = useSearchParams();
+  const id = search.get('id') ?? '';
 
   const [monitor, setMonitor] = useState<any>(null);
   const [checks, setChecks] = useState<any[]>([]);
@@ -231,7 +229,7 @@ export default function MonitorDetailPage() {
           api.monitors.incidents(id),
         ]);
         setMonitor(m);
-        setChecks(c.reverse()); // latest at the end for chart
+        setChecks(c.reverse());
         setIncidents(i);
       } finally {
         setFetching(false);
@@ -264,14 +262,12 @@ export default function MonitorDetailPage() {
     setMonitor(updated);
   };
 
-  // Prepare chart data
   const chartData = checks.map(c => ({
     time: new Date(c.checkedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     responseTime: c.responseTime || 0,
     status: c.status
   }));
 
-  // Calculate some stats
   const upDuration = monitor.status === 'UP' && checks.length > 0
     ? Math.floor((new Date().getTime() - new Date(checks[0].checkedAt).getTime()) / 1000)
     : 0;
@@ -281,8 +277,7 @@ export default function MonitorDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#0f1115] text-slate-300 p-6 md:p-10 font-sans">
-      
-      {/* Top Header */}
+
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
         <div className="flex items-center gap-4">
           <StatusBadge status={monitor.status} />
@@ -296,7 +291,7 @@ export default function MonitorDetailPage() {
             <p className="text-sm text-slate-400 mt-0.5">HTTP/S monitor for <a href={monitor.url} className="text-emerald-400 hover:underline">{monitor.url}</a></p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3">
           <button onClick={() => setShowTestModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
@@ -317,11 +312,9 @@ export default function MonitorDetailPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        
-        {/* Main Content Column */}
+
         <div className="lg:col-span-2 xl:col-span-3 space-y-6">
-          
-          {/* Top 3 Cards */}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
               <p className="text-sm text-slate-400 mb-3">Current status</p>
@@ -330,7 +323,7 @@ export default function MonitorDetailPage() {
               </h2>
               <p className="text-sm text-slate-400">Currently {isUp ? 'up' : 'down'} for {formatDuration(upDuration)}</p>
             </div>
-            
+
             <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
               <p className="text-sm text-slate-400 mb-3">Last check</p>
               <h2 className="text-2xl font-bold text-white mb-2 tabular-nums">
@@ -353,7 +346,6 @@ export default function MonitorDetailPage() {
             </div>
           </div>
 
-          {/* Stats Bar */}
           <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-white/5">
               <div className="px-2">
@@ -380,7 +372,6 @@ export default function MonitorDetailPage() {
             </div>
           </div>
 
-          {/* Response Time Chart */}
           <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
             <div className="flex justify-between items-center mb-8">
               <h3 className="font-bold text-white flex items-center gap-2">
@@ -398,38 +389,38 @@ export default function MonitorDetailPage() {
                 </select>
               </div>
             </div>
-            
+
             <div className="h-64 w-full">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>
-                    <XAxis 
-                      dataKey="time" 
-                      stroke="#475569" 
-                      fontSize={11} 
-                      tickLine={false} 
-                      axisLine={false} 
+                    <XAxis
+                      dataKey="time"
+                      stroke="#475569"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
                       minTickGap={30}
                     />
-                    <YAxis 
-                      stroke="#475569" 
-                      fontSize={11} 
-                      tickLine={false} 
-                      axisLine={false} 
+                    <YAxis
+                      stroke="#475569"
+                      fontSize={11}
+                      tickLine={false}
+                      axisLine={false}
                       tickFormatter={(val) => `${val}ms`}
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ backgroundColor: '#1a1d24', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
                       itemStyle={{ color: '#34d399' }}
                       labelStyle={{ color: '#94a3b8', marginBottom: '4px' }}
                     />
                     <ReferenceLine y={chartData[chartData.length-1]?.responseTime} stroke="#34d399" strokeDasharray="3 3" opacity={0.5} />
-                    <Line 
-                      type="monotone" 
-                      dataKey="responseTime" 
-                      stroke="#34d399" 
-                      strokeWidth={2} 
-                      dot={false} 
+                    <Line
+                      type="monotone"
+                      dataKey="responseTime"
+                      stroke="#34d399"
+                      strokeWidth={2}
+                      dot={false}
                       activeDot={{ r: 4, fill: '#34d399', stroke: '#1a1d24', strokeWidth: 2 }}
                     />
                   </LineChart>
@@ -459,7 +450,6 @@ export default function MonitorDetailPage() {
             </div>
           </div>
 
-          {/* Incidents */}
           <div className="bg-[#171a21] border border-white/[0.04] rounded-xl overflow-hidden">
             <div className="px-6 py-4 border-b border-white/[0.04]">
               <h3 className="font-bold text-white">Latest incidents<span className="text-emerald-400">.</span></h3>
@@ -488,12 +478,10 @@ export default function MonitorDetailPage() {
 
         </div>
 
-        {/* Right Sidebar Column */}
         <div className="space-y-6">
-          
+
           <DomainSslCard monitor={monitor} />
 
-          {/* Notified to */}
           <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
             <h3 className="font-bold text-white mb-2">
               Notified to<span className="text-emerald-400">.</span>
@@ -533,3 +521,16 @@ export default function MonitorDetailPage() {
   );
 }
 
+export default function MonitorDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-8 h-8 border-2 border-emerald-400/20 border-t-emerald-400 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <MonitorDetailInner />
+    </Suspense>
+  );
+}

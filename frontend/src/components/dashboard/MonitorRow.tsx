@@ -23,7 +23,7 @@ export function MonitorRow({ monitor: m, onToggle, onDelete }: Props) {
 
       <div className="flex-1 min-w-0">
         <Link
-          href={`/monitors/${m.id}`}
+          href={`/monitors/detail?id=${m.id}`}
           className="font-semibold text-white hover:text-emerald-400 transition-colors block truncate"
         >
           {m.name}

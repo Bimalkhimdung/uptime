@@ -1,6 +1,6 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { Suspense, useCallback, useEffect, useState } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { SeoScoreBadge } from '@/components/seo/SeoScoreBadge';
@@ -31,10 +31,10 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-export default function SiteDetailPage() {
-  const params = useParams();
+function SiteDetailInner() {
+  const search = useSearchParams();
   const router = useRouter();
-  const id = params.id as string;
+  const id = search.get('id') ?? '';
 
   const [site, setSite] = useState<any>(null);
   const [fetching, setFetching] = useState(true);
@@ -329,5 +329,19 @@ export default function SiteDetailPage() {
         />
       )}
     </div>
+  );
+}
+
+export default function SiteDetailPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="w-8 h-8 border-2 border-emerald-400/20 border-t-emerald-400 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <SiteDetailInner />
+    </Suspense>
   );
 }

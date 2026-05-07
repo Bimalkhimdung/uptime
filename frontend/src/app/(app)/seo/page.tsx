@@ -1,5 +1,5 @@
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { Suspense, useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
@@ -20,7 +20,7 @@ function timeAgo(date: string | Date | null | undefined) {
   return `${Math.floor(seconds / 86400)}d ago`;
 }
 
-export default function SeoIndexPage() {
+function SeoIndexInner() {
   const search = useSearchParams();
   const router = useRouter();
   const [sites, setSites] = useState<any[]>([]);
@@ -130,7 +130,7 @@ export default function SeoIndexPage() {
 
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={`/seo/${s.id}`}
+                      href={`/seo/detail?id=${s.id}`}
                       className="font-semibold text-white hover:text-emerald-400 transition-colors block truncate"
                     >
                       {s.name || s.url}
@@ -199,5 +199,19 @@ export default function SeoIndexPage() {
         />
       )}
     </>
+  );
+}
+
+export default function SeoIndexPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex items-center justify-center py-40">
+          <div className="w-8 h-8 border-2 border-emerald-400/20 border-t-emerald-400 rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <SeoIndexInner />
+    </Suspense>
   );
 }

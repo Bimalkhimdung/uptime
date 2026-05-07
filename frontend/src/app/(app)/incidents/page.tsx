@@ -42,7 +42,7 @@ export default function IncidentsPage() {
                 <div key={inc.id} className="flex items-center px-6 py-4">
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={`/monitors/${inc.monitor.id}`}
+                      href={`/monitors/detail?id=${inc.monitor.id}`}
                       className="font-semibold text-white hover:text-emerald-400 transition-colors"
                     >
                       {inc.monitor.name}
@@ -84,7 +84,7 @@ export default function IncidentsPage() {
                   <span className="w-2 h-2 rounded-full bg-emerald-400 mr-4 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
                     <Link
-                      href={`/monitors/${inc.monitor.id}`}
+                      href={`/monitors/detail?id=${inc.monitor.id}`}
                       className="font-semibold text-white hover:text-emerald-400 transition-colors"
                     >
                       {inc.monitor.name}

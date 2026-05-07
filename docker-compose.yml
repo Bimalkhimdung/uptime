@@ -27,11 +27,11 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: https://uptime.nepsesignal.com/api
     container_name: uptime_frontend
     restart: unless-stopped
     depends_on:
       - backend
-    environment:
-      NEXT_PUBLIC_API_URL: https://uptime.nepsesignal.com/api
     ports:
-      - '3004:3000'
+      - '3004:80'
