@@ -21,11 +21,11 @@ export class AlertsService {
   async sendDownAlert(monitor: any, contact: any, errorMessage?: string) {
     if (contact.type !== 'EMAIL') return;
 
-    const subject = `🔴 [DOWN] ${monitor.name} is unreachable`;
+    const subject = `[DOWN] ${monitor.name} is unreachable`;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #ef4444; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-          <h1 style="margin:0; font-size: 24px;">🔴 Monitor Down</h1>
+          <h1 style="margin:0; font-size: 24px;"> Monitor Down</h1>
         </div>
         <div style="background: #f9fafb; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb;">
           <h2 style="color: #111827; margin-top: 0;">${monitor.name}</h2>
@@ -60,11 +60,11 @@ export class AlertsService {
   async sendRecoveryAlert(monitor: any, contact: any) {
     if (contact.type !== 'EMAIL') return;
 
-    const subject = `🟢 [RECOVERED] ${monitor.name} is back online`;
+    const subject = `[RECOVERED] ${monitor.name} is back online`;
     const html = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         <div style="background: #22c55e; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
-          <h1 style="margin:0; font-size: 24px;">🟢 Monitor Recovered</h1>
+          <h1 style="margin:0; font-size: 24px;">Monitor Recovered</h1>
         </div>
         <div style="background: #f9fafb; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #e5e7eb;">
           <h2 style="color: #111827; margin-top: 0;">${monitor.name}</h2>

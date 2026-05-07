@@ -80,4 +80,9 @@ export class MonitorsController {
   testNotification(@Request() req: any, @Param('id') id: string) {
     return this.monitorsService.sendTestNotification(req.user.sub, id);
   }
+
+  @Post(':id/refresh-metadata')
+  refreshMetadata(@Request() req: any, @Param('id') id: string) {
+    return this.monitorsService.refreshMetadata(req.user.sub, id);
+  }
 }

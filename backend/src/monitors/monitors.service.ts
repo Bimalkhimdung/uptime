@@ -73,6 +73,26 @@ export class MonitorsService {
     });
   }
 
+  /**
+   * Re-run WHOIS + Geo lookups for a single monitor, then return the fresh row.
+   * Used by the manual "refresh metadata" button — not the daily cron.
+   */
+  async refreshMetadata(userId: string, id: string) {
+    const monitor = await this.prisma.monitor.findUnique({ where: { id } });
+    if (!monitor) throw new NotFoundException('Monitor not found');
+    if (monitor.userId !== userId) throw new ForbiddenException();
+
+    await Promise.allSettled([
+      this.scheduler.refreshWhoisForMonitor(monitor.id, monitor.url),
+      this.scheduler.refreshGeoForMonitor(monitor.id, monitor.url),
+    ]);
+
+    return this.prisma.monitor.findUnique({
+      where: { id },
+      include: { alertContacts: true },
+    });
+  }
+
   async findOne(userId: string, id: string) {
     const monitor = await this.prisma.monitor.findUnique({
       where: { id },

@@ -1,5 +1,5 @@
 'use client';
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect, useRef, useState } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
@@ -218,6 +218,27 @@ function MonitorDetailInner() {
   const [fetching, setFetching] = useState(true);
   const [showTestModal, setShowTestModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const handlePointer = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('mousedown', handlePointer);
+    document.addEventListener('keydown', handleEsc);
+    return () => {
+      document.removeEventListener('mousedown', handlePointer);
+      document.removeEventListener('keydown', handleEsc);
+    };
+  }, [menuOpen]);
 
   useEffect(() => {
     if (!id) return;
@@ -262,6 +283,16 @@ function MonitorDetailInner() {
     setMonitor(updated);
   };
 
+  const handleRefreshMetadata = async () => {
+    setRefreshing(true);
+    try {
+      const updated = await api.monitors.refreshMetadata(id);
+      setMonitor(updated);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   const chartData = checks.map(c => ({
     time: new Date(c.checkedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
     responseTime: c.responseTime || 0,
@@ -292,7 +323,7 @@ function MonitorDetailInner() {
           </div>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <button onClick={() => setShowTestModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             Test Notification
@@ -305,9 +336,54 @@ function MonitorDetailInner() {
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             Edit
           </button>
-          <button className="p-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-slate-400 transition-colors">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
-          </button>
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((o) => !o)}
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              title="More actions"
+              className={`p-2 border border-white/5 rounded-lg text-slate-400 transition-colors ${
+                menuOpen ? 'bg-[#252830] text-white' : 'bg-[#1a1d24] hover:bg-[#252830]'
+              }`}
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg>
+            </button>
+            {menuOpen && (
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-2 w-56 bg-[#171a21] border border-white/10 rounded-xl shadow-2xl overflow-hidden z-20"
+              >
+                <button
+                  type="button"
+                  role="menuitem"
+                  disabled={refreshing}
+                  onClick={() => {
+                    setMenuOpen(false);
+                    handleRefreshMetadata();
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-slate-200 hover:bg-white/[0.04] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className={refreshing ? 'animate-spin' : ''}
+                  >
+                    <polyline points="23 4 23 10 17 10" />
+                    <polyline points="1 20 1 14 7 14" />
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15" />
+                  </svg>
+                  {refreshing ? 'Refreshing…' : 'Refresh metadata'}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

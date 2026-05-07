@@ -63,6 +63,8 @@ export const api = {
         `/monitors/${id}/test-notification`,
         { method: 'POST' },
       ),
+    refreshMetadata: (id: string) =>
+      request<any>(`/monitors/${id}/refresh-metadata`, { method: 'POST' }),
   },
 
   incidents: {
