@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 
-const FEATURES = [
+const FEATURES: { title: string; icon: string; desc: string; href?: string }[] = [
   { title: 'Website monitoring', icon: '🌐', desc: 'Continuous uptime checks for your websites and APIs.' },
   { title: 'Real-time mail alerts', icon: '📧', desc: 'Instant notifications when your services go down.' },
   { title: 'SEO Expert', icon: '🔍', desc: 'Optimize your search visibility and track rankings.' },
