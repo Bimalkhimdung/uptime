@@ -35,8 +35,13 @@ export class AuthService {
     const valid = await bcrypt.compare(dto.password, user.password);
     if (!valid) throw new UnauthorizedException('Invalid credentials');
 
-    const token = this.signTokenForUser(user);
-    return { token, user: this.sanitize(user) };
+    const updated = await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
+    const token = this.signTokenForUser(updated);
+    return { token, user: this.sanitize(updated) };
   }
 
   async me(userId: string) {
@@ -54,10 +59,17 @@ export class AuthService {
     email: string;
     name?: string | null;
   }) {
+    const now = new Date();
+
     const byGoogle = await this.prisma.user.findUnique({
       where: { googleId: input.googleId },
     });
-    if (byGoogle) return byGoogle;
+    if (byGoogle) {
+      return this.prisma.user.update({
+        where: { id: byGoogle.id },
+        data: { lastLoginAt: now },
+      });
+    }
 
     const byEmail = await this.prisma.user.findUnique({
       where: { email: input.email },
@@ -65,7 +77,11 @@ export class AuthService {
     if (byEmail) {
       return this.prisma.user.update({
         where: { id: byEmail.id },
-        data: { googleId: input.googleId, name: byEmail.name ?? input.name ?? null },
+        data: {
+          googleId: input.googleId,
+          name: byEmail.name ?? input.name ?? null,
+          lastLoginAt: now,
+        },
       });
     }
 
@@ -74,6 +90,7 @@ export class AuthService {
         email: input.email,
         name: input.name ?? null,
         googleId: input.googleId,
+        lastLoginAt: now,
       },
     });
   }

@@ -15,9 +15,40 @@ const PUBLIC_FIELDS = {
   name: true,
   isSuperuser: true,
   googleId: true,
+  lastLoginAt: true,
   createdAt: true,
   updatedAt: true,
+  monitors: { select: { url: true } },
+  sites: { select: { url: true } },
 } as const;
+
+type UserWithUrls = {
+  monitors: { url: string }[];
+  sites: { url: string }[];
+  [k: string]: unknown;
+};
+
+/** Unique, sorted hostnames extracted from a list of URLs. */
+function toDomains(items: { url: string }[]): string[] {
+  const set = new Set<string>();
+  for (const { url } of items) {
+    try {
+      set.add(new URL(url).hostname.toLowerCase());
+    } catch {
+      /* ignore invalid URLs */
+    }
+  }
+  return [...set].sort();
+}
+
+function withDomains<T extends UserWithUrls>(user: T) {
+  const { monitors: _m, sites: _s, ...rest } = user;
+  return {
+    ...rest,
+    monitorDomains: toDomains(user.monitors),
+    seoDomains: toDomains(user.sites),
+  };
+}
 
 @Injectable()
 export class UsersService {
@@ -42,11 +73,12 @@ export class UsersService {
 
   /* ---------- admin ops (gated by SuperuserGuard at the controller) ---------- */
 
-  listAll() {
-    return this.prisma.user.findMany({
+  async listAll() {
+    const users = await this.prisma.user.findMany({
       select: PUBLIC_FIELDS,
       orderBy: { createdAt: 'desc' },
     });
+    return users.map(withDomains);
   }
 
   async getOne(id: string) {
@@ -55,7 +87,7 @@ export class UsersService {
       select: PUBLIC_FIELDS,
     });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    return withDomains(user);
   }
 
   async create(dto: CreateUserDto) {
@@ -72,7 +104,7 @@ export class UsersService {
     }
 
     const hashed = await bcrypt.hash(dto.password, 12);
-    return this.prisma.user.create({
+    const created = await this.prisma.user.create({
       data: {
         email: dto.email,
         password: hashed,
@@ -82,6 +114,7 @@ export class UsersService {
       },
       select: PUBLIC_FIELDS,
     });
+    return withDomains(created);
   }
 
   async update(id: string, dto: UpdateUserDto) {
@@ -106,10 +139,11 @@ export class UsersService {
     if (dto.isSuperuser !== undefined) data.isSuperuser = dto.isSuperuser;
     if (dto.password) data.password = await bcrypt.hash(dto.password, 12);
 
-    return this.prisma.user.update({
+    const updated = await this.prisma.user.update({
       where: { id },
       data,
       select: PUBLIC_FIELDS,
     });
+    return withDomains(updated);
   }
 }

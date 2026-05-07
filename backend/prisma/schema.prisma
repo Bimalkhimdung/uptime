@@ -18,6 +18,7 @@ model User {
   password    String?
   name        String?
   isSuperuser Boolean   @default(false)
+  lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   monitors    Monitor[]
