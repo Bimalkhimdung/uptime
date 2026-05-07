@@ -307,32 +307,32 @@ function MonitorDetailInner() {
   const isUp = monitor.status === 'UP';
 
   return (
-    <div className="min-h-screen bg-[#0f1115] text-slate-300 p-6 md:p-10 font-sans">
+    <div className="min-h-screen bg-[#0f1115] text-slate-300 p-4 sm:p-6 md:p-10 font-sans">
 
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-        <div className="flex items-center gap-4">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 sm:mb-8 gap-4">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0 w-full">
           <StatusBadge status={monitor.status} />
-          <div>
-            <div className="flex items-center gap-3">
-              <h1 className="text-2xl font-bold text-white tracking-tight">{monitor.name}</h1>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 sm:gap-3">
+              <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight truncate">{monitor.name}</h1>
               <a href={monitor.url} target="_blank" rel="noreferrer" className="text-slate-400 hover:text-white transition-colors">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
               </a>
             </div>
-            <p className="text-sm text-slate-400 mt-0.5">HTTP/S monitor for <a href={monitor.url} className="text-emerald-400 hover:underline">{monitor.url}</a></p>
+            <p className="text-xs sm:text-sm text-slate-400 mt-0.5 truncate">HTTP/S monitor for <a href={monitor.url} className="text-emerald-400 hover:underline">{monitor.url}</a></p>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap">
-          <button onClick={() => setShowTestModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap w-full md:w-auto">
+          <button onClick={() => setShowTestModal(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
             Test Notification
           </button>
-          <button onClick={handleTogglePause} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
+          <button onClick={handleTogglePause} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="10" y1="15" x2="10" y2="9"></line><line x1="14" y1="15" x2="14" y2="9"></line></svg>
             {monitor.isActive ? 'Pause' : 'Resume'}
           </button>
-          <button onClick={() => setShowEditModal(true)} className="flex items-center gap-2 px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-sm font-medium transition-colors">
+          <button onClick={() => setShowEditModal(true)} className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-[#1a1d24] hover:bg-[#252830] border border-white/5 rounded-lg text-xs sm:text-sm font-medium transition-colors">
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
             Edit
           </button>
@@ -387,12 +387,12 @@ function MonitorDetailInner() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
 
-        <div className="lg:col-span-2 xl:col-span-3 space-y-6">
+        <div className="lg:col-span-2 xl:col-span-3 space-y-4 sm:space-y-6">
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-4 sm:p-6">
               <p className="text-sm text-slate-400 mb-3">Current status</p>
               <h2 className={`text-2xl font-bold mb-2 ${isUp ? 'text-emerald-400' : 'text-red-400'}`}>
                 {isUp ? 'Up' : 'Down'}
@@ -400,7 +400,7 @@ function MonitorDetailInner() {
               <p className="text-sm text-slate-400">Currently {isUp ? 'up' : 'down'} for {formatDuration(upDuration)}</p>
             </div>
 
-            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
+            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-4 sm:p-6">
               <p className="text-sm text-slate-400 mb-3">Last check</p>
               <h2 className="text-2xl font-bold text-white mb-2 tabular-nums">
                 <LiveTimeAgo dateString={monitor.lastCheckedAt} />
@@ -408,7 +408,7 @@ function MonitorDetailInner() {
               <p className="text-sm text-slate-400">Checked every {monitor.interval}m</p>
             </div>
 
-            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
+            <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-4 sm:p-6">
               <div className="flex justify-between items-center mb-3">
                 <p className="text-sm text-slate-400">Last 24 hours</p>
                 <p className="text-sm font-bold text-white">{uptimePercentStr}</p>
@@ -422,51 +422,51 @@ function MonitorDetailInner() {
             </div>
           </div>
 
-          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 divide-x divide-white/5">
-              <div className="px-2">
-                <p className="text-sm text-slate-400 mb-2">Last 7 days</p>
-                <p className="text-2xl font-bold text-emerald-400 mb-2">{uptimePercentStr}</p>
+          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-4 sm:p-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6 sm:divide-x sm:divide-white/5">
+              <div className="sm:px-2">
+                <p className="text-xs sm:text-sm text-slate-400 mb-2">Last 7 days</p>
+                <p className="text-xl sm:text-2xl font-bold text-emerald-400 mb-2">{uptimePercentStr}</p>
                 <p className="text-xs text-slate-400 leading-relaxed">0 incidents, 0m down</p>
               </div>
-              <div className="px-6">
-                <p className="text-sm text-slate-400 mb-2">Last 30 days</p>
-                <p className="text-2xl font-bold text-emerald-400 mb-2">{uptimePercentStr}</p>
+              <div className="sm:px-6">
+                <p className="text-xs sm:text-sm text-slate-400 mb-2">Last 30 days</p>
+                <p className="text-xl sm:text-2xl font-bold text-emerald-400 mb-2">{uptimePercentStr}</p>
                 <p className="text-xs text-slate-400 leading-relaxed">0 incidents, 0m down</p>
               </div>
-              <div className="px-6">
-                <p className="text-sm text-slate-400 mb-2">Last 365 days</p>
-                <p className="text-2xl font-bold text-white mb-2">--.---%</p>
+              <div className="sm:px-6">
+                <p className="text-xs sm:text-sm text-slate-400 mb-2">Last 365 days</p>
+                <p className="text-xl sm:text-2xl font-bold text-white mb-2">--.---%</p>
                 <a href="#" className="text-xs text-emerald-400 hover:underline">Unlock with paid plans</a>
               </div>
-              <div className="px-6 relative">
-                <p className="text-sm text-slate-400 mb-2 flex items-center gap-1">
+              <div className="sm:px-6 relative">
+                <p className="text-xs sm:text-sm text-slate-400 mb-2 flex items-center gap-1">
                   MTBF <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
                 </p>
-                <p className="text-2xl font-bold text-slate-500 mb-2">N/A</p>
+                <p className="text-xl sm:text-2xl font-bold text-slate-500 mb-2">N/A</p>
               </div>
             </div>
           </div>
 
-          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-6">
-            <div className="flex justify-between items-center mb-8">
-              <h3 className="font-bold text-white flex items-center gap-2">
+          <div className="bg-[#171a21] border border-white/[0.04] rounded-xl p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 mb-6 sm:mb-8">
+              <h3 className="font-bold text-white flex items-center gap-2 text-sm sm:text-base">
                 Response time for <span className="underline decoration-dashed decoration-slate-500 underline-offset-4 cursor-pointer">All regions</span>
               </h3>
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                 <button className="flex items-center gap-2 text-xs text-emerald-400 hover:text-emerald-300">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
                   Setup alerts
                 </button>
-                <span className="text-xs text-slate-400">For slow response times</span>
-                <select className="bg-[#0f1115] border border-white/10 rounded-md px-3 py-1 text-sm text-white outline-none">
+                <span className="hidden sm:inline text-xs text-slate-400">For slow response times</span>
+                <select className="bg-[#0f1115] border border-white/10 rounded-md px-3 py-1 text-xs sm:text-sm text-white outline-none">
                   <option>Last hour</option>
                   <option>Last 24 hours</option>
                 </select>
               </div>
             </div>
 
-            <div className="h-64 w-full">
+            <div className="h-48 sm:h-64 w-full">
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={chartData} margin={{ top: 5, right: 0, left: -20, bottom: 0 }}>

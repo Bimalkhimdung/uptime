@@ -61,13 +61,13 @@ export default function DashboardPage() {
 
   return (
     <>
-      <div className="px-12 pt-12 pb-20 max-w-[1400px]">
-        <div className="flex items-start justify-between gap-6 mb-2">
-          <h1 className="text-5xl md:text-6xl font-black tracking-tight text-white">
+      <div className="px-4 sm:px-6 lg:px-12 pt-6 sm:pt-10 lg:pt-12 pb-20 max-w-[1400px]">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 sm:gap-6 mb-2">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black tracking-tight text-white">
             Monitors<span className="text-emerald-400">.</span>
           </h1>
 
-          <div className="flex items-stretch rounded-xl overflow-hidden shadow-lg shadow-indigo-900/30">
+          <div className="flex items-stretch rounded-xl overflow-hidden shadow-lg shadow-indigo-900/30 self-start">
             <button
               onClick={() => setShowAdd(true)}
               className="bg-indigo-600 hover:bg-indigo-500 text-white font-semibold px-5 py-2.5 flex items-center gap-2 text-sm transition-colors"
@@ -92,7 +92,7 @@ export default function DashboardPage() {
         ) : monitors.length === 0 ? (
           <MonitorsEmptyState onCreate={() => setShowAdd(true)} />
         ) : (
-          <div className="mt-12 bg-white/[0.02] border border-white/[0.06] rounded-3xl p-3 backdrop-blur-sm">
+          <div className="mt-6 sm:mt-10 lg:mt-12 bg-white/[0.02] border border-white/[0.06] rounded-2xl sm:rounded-3xl p-2 sm:p-3 backdrop-blur-sm">
             {monitors.map((m) => (
               <MonitorRow
                 key={m.id}

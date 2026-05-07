@@ -59,11 +59,11 @@ export function ConfirmModal({
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:px-4 overflow-y-auto py-0 sm:py-6"
       onClick={loading ? undefined : onCancel}
     >
       <div
-        className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl shadow-black/60"
+        className="bg-[#111118] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl shadow-black/60 max-h-[95vh] overflow-y-auto"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="px-6 pt-6 pb-2 flex items-start gap-4">

@@ -43,9 +43,9 @@ export function TestNotificationModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center sm:p-4 bg-black/70 backdrop-blur-sm overflow-y-auto">
       <div
-        className="w-full max-w-md bg-[#0f1115] border border-white/[0.08] rounded-2xl shadow-2xl p-7"
+        className="w-full max-w-md bg-[#0f1115] border border-white/[0.08] rounded-t-2xl sm:rounded-2xl shadow-2xl p-5 sm:p-7 max-h-[95vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
       >

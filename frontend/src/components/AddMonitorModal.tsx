@@ -33,18 +33,18 @@ export default function AddMonitorModal({ onClose, onCreated }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center px-4">
-      <div className="bg-[#111118] border border-white/10 rounded-2xl w-full max-w-md shadow-2xl shadow-black/60">
-        <div className="flex items-center justify-between px-6 py-5 border-b border-white/8">
-          <h2 className="font-semibold text-white text-lg">Add Monitor</h2>
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center sm:px-4 overflow-y-auto py-0 sm:py-6">
+      <div className="bg-[#111118] border border-white/10 rounded-t-2xl sm:rounded-2xl w-full max-w-md shadow-2xl shadow-black/60 max-h-[95vh] sm:max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-5 sm:px-6 py-4 sm:py-5 border-b border-white/8 sticky top-0 bg-[#111118] z-10">
+          <h2 className="font-semibold text-white text-base sm:text-lg">Add Monitor</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors text-xl leading-none"
+            className="text-slate-400 hover:text-white transition-colors text-2xl leading-none w-8 h-8 flex items-center justify-center"
           >
             ×
           </button>
         </div>
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 sm:space-y-5">
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 text-red-400 rounded-lg px-4 py-3 text-sm">
               {error}
@@ -74,7 +74,7 @@ export default function AddMonitorModal({ onClose, onCreated }: Props) {
               className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
             />
           </div>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-300 mb-1.5">Check Interval</label>
               <select

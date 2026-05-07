@@ -18,7 +18,7 @@ type Props = {
 
 export function MonitorRow({ monitor: m, onToggle, onDelete }: Props) {
   return (
-    <div className="flex items-center gap-4 px-6 py-5 rounded-2xl hover:bg-white/[0.02] transition-colors group">
+    <div className="flex items-center gap-3 sm:gap-4 px-3 sm:px-6 py-4 sm:py-5 rounded-2xl hover:bg-white/[0.02] transition-colors group">
       <StatusDot status={m.status} paused={!m.isActive} />
 
       <div className="flex-1 min-w-0">
@@ -45,7 +45,7 @@ export function MonitorRow({ monitor: m, onToggle, onDelete }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+      <div className="flex items-center gap-1.5 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
         <button
           onClick={() => onToggle(m)}
           title={m.isActive ? 'Pause' : 'Resume'}

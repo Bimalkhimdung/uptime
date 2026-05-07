@@ -48,67 +48,67 @@ export function Features() {
   const displayReviews = [...REVIEWS, ...REVIEWS];
 
   return (
-    <section className="py-32 relative overflow-hidden">
+    <section className="py-16 sm:py-24 md:py-32 relative overflow-hidden">
       {/* Subtle Globe/Map Background Decoration */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-emerald-500/5 rounded-full blur-[120px] pointer-events-none" />
 
       <div className="relative z-10">
-        <div className="text-center mb-20 px-6">
-          <h2 className="text-4xl md:text-6xl font-black text-white mb-6 italic tracking-tight leading-tight">
+        <div className="text-center mb-12 sm:mb-16 md:mb-20 px-4 sm:px-6">
+          <h2 className="text-3xl sm:text-4xl md:text-6xl font-black text-white mb-4 sm:mb-6 italic tracking-tight leading-tight">
             Trusted by <span className="text-emerald-400">5M+</span> <br className="hidden md:block" />
             users and developers globally.
           </h2>
-          <p className="text-slate-400 text-lg font-medium max-w-2xl mx-auto">
+          <p className="text-slate-400 text-base sm:text-lg font-medium max-w-2xl mx-auto">
             From solo founders to enterprise engineering teams, Uptime provides the reliability needed to scale with confidence.
           </p>
         </div>
 
         {/* Marquee Container */}
-        <div className="relative w-full overflow-hidden py-10">
+        <div className="relative w-full overflow-hidden py-6 sm:py-10">
           {/* Gradient Masks */}
-          <div className="absolute inset-y-0 left-0 w-32 md:w-64 bg-gradient-to-r from-[#0a1110] to-transparent z-20 pointer-events-none" />
-          <div className="absolute inset-y-0 right-0 w-32 md:w-64 bg-gradient-to-l from-[#0a1110] to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-y-0 left-0 w-16 sm:w-32 md:w-64 bg-gradient-to-r from-[#0a1110] to-transparent z-20 pointer-events-none" />
+          <div className="absolute inset-y-0 right-0 w-16 sm:w-32 md:w-64 bg-gradient-to-l from-[#0a1110] to-transparent z-20 pointer-events-none" />
 
-          <div className="flex gap-10 animate-marquee px-6 w-max py-10">
+          <div className="flex gap-4 sm:gap-6 md:gap-10 animate-marquee px-4 sm:px-6 w-max py-6 sm:py-10">
             {displayReviews.map((review, i) => (
               <div
                 key={i}
-                className="flex-shrink-0 w-[400px] md:w-[550px] group relative bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-12 overflow-hidden hover:bg-white/[0.06] transition-all duration-700 hover:border-emerald-500/30 hover:shadow-[0_30px_70px_-20px_rgba(16,185,129,0.3)] backdrop-blur-md"
+                className="flex-shrink-0 w-[85vw] sm:w-[400px] md:w-[550px] group relative bg-white/[0.03] border border-white/10 rounded-[2rem] sm:rounded-[2.5rem] p-6 sm:p-9 md:p-12 overflow-hidden hover:bg-white/[0.06] transition-all duration-700 hover:border-emerald-500/30 hover:shadow-[0_30px_70px_-20px_rgba(16,185,129,0.3)] backdrop-blur-md"
               >
                 <div
                   className={`absolute -top-12 -right-12 w-48 h-48 bg-gradient-to-br ${review.color} blur-[80px] opacity-10 group-hover:opacity-30 transition-opacity duration-700`}
                 />
 
                 <div className="relative z-10">
-                  <div className="flex items-center gap-5 mb-10">
-                    <div className={`w-14 h-14 rounded-2xl overflow-hidden bg-gradient-to-br ${review.color} flex items-center justify-center text-black font-black text-sm shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
+                  <div className="flex items-center gap-3 sm:gap-5 mb-6 sm:mb-8 md:mb-10">
+                    <div className={`w-12 h-12 sm:w-14 sm:h-14 rounded-xl sm:rounded-2xl overflow-hidden bg-gradient-to-br ${review.color} flex items-center justify-center text-black font-black text-sm shrink-0 shadow-lg group-hover:scale-110 transition-transform duration-500`}>
                       {review.avatar.startsWith('http') ? (
                         <img src={review.avatar} alt={review.name} className="w-full h-full object-cover" />
                       ) : (
                         review.avatar || review.name.charAt(0)
                       )}
                     </div>
-                    <div>
-                      <h4 className="text-white font-bold text-lg tracking-tight group-hover:text-emerald-400 transition-colors duration-500">{review.name}</h4>
-                      <p className="text-slate-500 text-xs font-bold uppercase tracking-widest">{review.role}</p>
+                    <div className="min-w-0">
+                      <h4 className="text-white font-bold text-base sm:text-lg tracking-tight group-hover:text-emerald-400 transition-colors duration-500 truncate">{review.name}</h4>
+                      <p className="text-slate-500 text-[10px] sm:text-xs font-bold uppercase tracking-widest truncate">{review.role}</p>
                     </div>
                   </div>
 
-                  <div className="mb-10 relative">
-                    <span className="absolute -top-4 -left-4 text-emerald-500/20 text-6xl font-serif">"</span>
-                    <p className="text-slate-200 text-xl leading-relaxed font-medium italic relative z-10">
+                  <div className="mb-6 sm:mb-8 md:mb-10 relative">
+                    <span className="absolute -top-4 -left-2 sm:-left-4 text-emerald-500/20 text-5xl sm:text-6xl font-serif">"</span>
+                    <p className="text-slate-200 text-base sm:text-lg md:text-xl leading-relaxed font-medium italic relative z-10">
                       {review.text}
                     </p>
                   </div>
 
                   <div className="flex items-center justify-between mt-auto">
-                    <div className="flex gap-1.5">
+                    <div className="flex gap-1 sm:gap-1.5">
                       {[...Array(5)].map((_, star) => (
-                        <span key={star} className="text-emerald-400 text-lg drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">★</span>
+                        <span key={star} className="text-emerald-400 text-base sm:text-lg drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]">★</span>
                       ))}
                     </div>
-                    <div className="h-px flex-grow mx-4 bg-white/5" />
-                    <div className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">Verified Review</div>
+                    <div className="h-px flex-grow mx-3 sm:mx-4 bg-white/5" />
+                    <div className="text-[9px] sm:text-[10px] font-black text-slate-600 uppercase tracking-tighter shrink-0">Verified Review</div>
                   </div>
                 </div>
               </div>
