@@ -11,16 +11,17 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  email     String    @unique
-  username  String?   @unique
-  googleId  String?   @unique
-  password  String?
-  name      String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  monitors  Monitor[]
-  sites     Site[]
+  id          String    @id @default(uuid())
+  email       String    @unique
+  username    String?   @unique
+  googleId    String?   @unique
+  password    String?
+  name        String?
+  isSuperuser Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  monitors    Monitor[]
+  sites       Site[]
   // Google Analytics OAuth connection (read-only scope)
   googleAccessToken     String?
   googleRefreshToken    String?

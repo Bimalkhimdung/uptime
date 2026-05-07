@@ -9,11 +9,11 @@ async function main() {
 
   const user = await prisma.user.upsert({
     where: { email },
-    update: { password, name: 'bimal', username: 'bimal' },
-    create: { email, password, name: 'bimal', username: 'bimal' },
+    update: { password, name: 'bimal', username: 'bimal', isSuperuser: true },
+    create: { email, password, name: 'bimal', username: 'bimal', isSuperuser: true },
   });
 
-  console.log(`Seeded user: ${user.email} (id=${user.id})`);
+  console.log(`Seeded superuser: ${user.email} (id=${user.id})`);
 }
 
 main()

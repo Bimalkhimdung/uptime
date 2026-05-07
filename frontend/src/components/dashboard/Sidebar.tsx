@@ -32,6 +32,10 @@ const NAV: NavItem[] = [
   { label: 'Integrations & API', href: '#', icon: IntegrationsIcon },
 ];
 
+const ADMIN_NAV: NavItem[] = [
+  { label: 'User management', href: '/users', icon: TeamIcon },
+];
+
 export function Sidebar() {
   const pathname = usePathname();
   const { user, logout } = useAuth();
@@ -72,6 +76,32 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        {user?.isSuperuser && (
+          <>
+            <div className="px-4 pt-6 pb-2 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-600">
+              Admin
+            </div>
+            {ADMIN_NAV.map((item) => {
+              const active = isActive(item);
+              const Icon = item.icon;
+              return (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className={
+                    active
+                      ? 'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold bg-white/[0.04] text-white border border-white/[0.06]'
+                      : 'flex items-center gap-3.5 px-4 py-3 rounded-2xl text-sm font-semibold text-slate-400 hover:text-white hover:bg-white/[0.02] transition-colors border border-transparent'
+                  }
+                >
+                  <Icon className={`w-5 h-5 ${active ? 'text-emerald-400' : 'text-slate-500'}`} />
+                  {item.label}
+                </Link>
+              );
+            })}
+          </>
+        )}
       </nav>
 
       <div className="p-4 space-y-3">

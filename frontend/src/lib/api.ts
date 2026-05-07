@@ -89,6 +89,33 @@ export const api = {
     analytics: (id: string) => request<any>(`/sites/${id}/analytics`),
   },
 
+  users: {
+    list: () => request<any[]>('/users'),
+    get: (id: string) => request<any>(`/users/${id}`),
+    create: (data: {
+      email: string;
+      password: string;
+      name?: string;
+      username?: string;
+      isSuperuser?: boolean;
+    }) =>
+      request<any>('/users', { method: 'POST', body: JSON.stringify(data) }),
+    update: (
+      id: string,
+      data: {
+        email?: string;
+        password?: string;
+        name?: string;
+        username?: string;
+        isSuperuser?: boolean;
+      },
+    ) =>
+      request<any>(`/users/${id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+  },
+
   google: {
     status: () =>
       request<{
