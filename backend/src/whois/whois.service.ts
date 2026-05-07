@@ -53,7 +53,8 @@ export class WhoisService {
         else resolve(data);
       });
     }).catch((err) => {
-      this.logger.warn(`WHOIS lookup failed for ${domain}: ${err.message}`);
+      const detail = err?.message || err?.code || JSON.stringify(err);
+      this.logger.warn(`WHOIS lookup failed for ${domain}: ${detail}`);
       return null;
     });
 

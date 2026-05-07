@@ -299,23 +299,33 @@ function DomainsCell({
   domains: string[];
   emptyLabel: string;
 }) {
+  const [expanded, setExpanded] = useState(false);
+
   if (domains.length === 0) {
     return <span className="text-xs text-slate-600" title={emptyLabel}>—</span>;
   }
+  const hasMore = domains.length > 2;
+  const visible = expanded || !hasMore ? domains : domains.slice(0, 2);
   return (
-    <div className="flex flex-wrap gap-1 min-w-0" title={domains.join('\n')}>
-      {domains.slice(0, 2).map((d) => (
+    <div className="flex flex-wrap gap-1 min-w-0">
+      {visible.map((d) => (
         <span
           key={d}
           className="inline-block bg-white/[0.04] border border-white/[0.06] text-slate-300 text-[11px] px-2 py-0.5 rounded-md font-mono truncate max-w-full"
+          title={d}
         >
           {d}
         </span>
       ))}
-      {domains.length > 2 && (
-        <span className="inline-block text-slate-500 text-[11px] px-1 py-0.5 font-semibold">
-          +{domains.length - 2}
-        </span>
+      {hasMore && (
+        <button
+          type="button"
+          onClick={() => setExpanded((e) => !e)}
+          aria-expanded={expanded}
+          className="inline-block text-emerald-400 hover:text-emerald-300 text-[11px] px-1.5 py-0.5 font-semibold rounded hover:bg-emerald-400/10 transition-colors cursor-pointer"
+        >
+          {expanded ? 'show less' : `+${domains.length - 2}`}
+        </button>
       )}
     </div>
   );
