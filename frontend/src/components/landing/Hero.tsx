@@ -1,5 +1,3 @@
-import Image from 'next/image';
-
 export function Hero() {
   return (
     <section className="relative pt-32 md:pt-40 pb-20 md:pb-32 px-6 overflow-hidden">
@@ -27,15 +25,19 @@ export function Hero() {
         <div className="relative max-w-5xl mx-auto rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/10 border border-white/10 transform perspective-1000 rotate-x-6 md:rotate-x-12 scale-100 md:scale-105 hover:rotate-x-0 transition-transform duration-1000 ease-out">
           <div className="absolute inset-0 bg-gradient-to-t from-[#0a1110] via-transparent to-transparent z-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a1110] z-10" />
-          <Image
-            src="/logo/background.png"
-            alt="Uptime dashboard preview"
-            width={2932}
-            height={1594}
-            priority
-            sizes="(min-width: 1024px) 1024px, 100vw"
-            className="w-full h-auto"
-          />
+          <picture>
+            <source srcSet="/logo/background.webp" type="image/webp" />
+            <img
+              src="/logo/background.png"
+              alt="Uptime dashboard preview"
+              width={2932}
+              height={1594}
+              loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="w-full h-auto"
+            />
+          </picture>
         </div>
       </div>
     </section>
