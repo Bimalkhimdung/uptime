@@ -21,23 +21,52 @@ export function Hero() {
           20+ million page views monitored. 10,000+ websites protected.
         </p>
 
-        {/* Dashboard Screenshot Graphic */}
-        <div className="relative max-w-5xl mx-auto rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/10 border border-white/10 transform perspective-1000 rotate-x-6 md:rotate-x-12 scale-100 md:scale-105 hover:rotate-x-0 transition-transform duration-1000 ease-out">
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0a1110] via-transparent to-transparent z-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a1110] z-10" />
-          <picture>
-            <source srcSet="/logo/background.webp" type="image/webp" />
+        {/* Dashboard Screenshot Stack */}
+        <div className="relative max-w-5xl mx-auto">
+          {/* Back-left */}
+          <picture className="hidden sm:block pointer-events-none absolute left-0 top-10 md:top-14 w-[60%] z-0 -translate-x-[18%] -rotate-[7deg]">
+            <source srcSet="/logo/background1.webp" type="image/webp" />
             <img
-              src="/logo/background.png"
-              alt="Uptime dashboard preview"
-              width={2932}
-              height={1594}
-              loading="eager"
-              fetchPriority="high"
+              src="/logo/background1.webp"
+              alt=""
+              aria-hidden
+              loading="lazy"
               decoding="async"
-              className="w-full h-auto"
+              className="w-full h-auto rounded-xl md:rounded-2xl border border-white/10 shadow-2xl shadow-black/60 opacity-70"
             />
           </picture>
+
+          {/* Back-right */}
+          <picture className="hidden sm:block pointer-events-none absolute right-0 top-10 md:top-14 w-[60%] z-0 translate-x-[18%] rotate-[7deg]">
+            <source srcSet="/logo/background2.webp" type="image/webp" />
+            <img
+              src="/logo/background2.webp"
+              alt=""
+              aria-hidden
+              loading="lazy"
+              decoding="async"
+              className="w-full h-auto rounded-xl md:rounded-2xl border border-white/10 shadow-2xl shadow-black/60 opacity-70"
+            />
+          </picture>
+
+          {/* Front */}
+          <div className="relative z-10 rounded-xl md:rounded-2xl overflow-hidden shadow-2xl shadow-emerald-500/20 border border-white/10 transform perspective-1000 rotate-x-6 md:rotate-x-12 scale-100 md:scale-105 hover:rotate-x-0 transition-transform duration-1000 ease-out">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1110] via-transparent to-transparent z-10" />
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-[#0a1110] z-10" />
+            <picture>
+              <source srcSet="/logo/background.webp" type="image/webp" />
+              <img
+                src="/logo/background.png"
+                alt="Uptime dashboard preview"
+                width={2932}
+                height={1594}
+                loading="eager"
+                fetchPriority="high"
+                decoding="async"
+                className="w-full h-auto"
+              />
+            </picture>
+          </div>
         </div>
       </div>
     </section>
