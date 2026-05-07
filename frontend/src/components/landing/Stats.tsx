@@ -1,13 +1,21 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 
-const FEATURES: { title: string; icon: string; desc: string; href?: string }[] = [
-  { title: 'Website monitoring', icon: '🌐', desc: 'Continuous uptime checks for your websites and APIs.' },
-  { title: 'Real-time mail alerts', icon: '📧', desc: 'Instant notifications when your services go down.' },
-  { title: 'SEO Expert', icon: '🔍', desc: 'Optimize your search visibility and track rankings.' },
-  { title: '3rd party integrations', icon: '🔗', desc: 'Seamlessly connect with Slack, Discord, and more.' },
-  { title: 'DNS Record', icon: '🌍', desc: 'Monitor and track DNS changes for your domains.' },
-  { title: 'SSL Monitoring', icon: '🔐', desc: 'Get alerted before your SSL certificates expire.' },
+type Feature = {
+  title: string;
+  icon: string;
+  image?: string;
+  desc: string;
+  href?: string;
+};
+
+const FEATURES: Feature[] = [
+  { title: 'Website monitoring', icon: '🌐', image: '/pages/monitoring.png', desc: 'Continuous uptime checks for your websites and APIs.' },
+  { title: 'Real-time mail alerts', icon: '📧', image: '/pages/mailalerts.png', desc: 'Instant notifications when your services go down.' },
+  { title: 'SEO Expert', icon: '🔍', image: '/pages/seoexpert.png', desc: 'Optimize your search visibility and track rankings.' },
+  { title: '3rd party integrations', icon: '🔗', image: '/pages/thirdpartyintegrations.png', desc: 'Seamlessly connect with Slack, Discord, and more.' },
+  { title: 'DNS Record', icon: '🌍', image: '/pages/dnsrecord.png', desc: 'Monitor and track DNS changes for your domains.' },
+  { title: 'SSL Monitoring', icon: '🔐', image: '/pages/sslmonitoring.png', desc: 'Get alerted before your SSL certificates expire.' },
 ];
 
 export function Stats() {
@@ -40,9 +48,21 @@ export function Stats() {
             <>
               <div className="relative mb-8 inline-block">
                 <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full scale-0 group-hover:scale-150 transition-transform duration-700" />
-                <div className="text-4xl md:text-5xl relative z-10 group-hover:scale-110 transition-transform duration-500 filter drop-shadow-md">
-                  {feat.icon}
-                </div>
+                {feat.image ? (
+                  <img
+                    src={feat.image}
+                    alt={feat.title}
+                    width={96}
+                    height={96}
+                    loading="lazy"
+                    decoding="async"
+                    className="relative z-10 w-20 h-20 md:w-24 md:h-24 object-contain group-hover:scale-110 transition-transform duration-500 drop-shadow-md"
+                  />
+                ) : (
+                  <div className="text-4xl md:text-5xl relative z-10 group-hover:scale-110 transition-transform duration-500 filter drop-shadow-md">
+                    {feat.icon}
+                  </div>
+                )}
               </div>
               <h3 className="text-2xl font-bold text-white mb-4 tracking-tight group-hover:text-emerald-400 transition-colors duration-500 italic">{feat.title}</h3>
               <p className="text-slate-400 text-lg font-medium leading-relaxed group-hover:text-slate-300 transition-colors duration-500">
