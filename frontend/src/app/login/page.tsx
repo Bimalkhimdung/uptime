@@ -81,6 +81,11 @@ function LoginInner() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !loading) {
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }}
                 required
                 placeholder="bimal or you@example.com"
                 className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
@@ -91,8 +96,14 @@ function LoginInner() {
               <input
                 id="password"
                 type="password"
+                autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && !loading) {
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }}
                 required
                 placeholder="••••••••"
                 className="w-full bg-white/[0.06] border border-white/10 rounded-lg px-4 py-2.5 text-white placeholder-slate-500 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500/50 focus:border-violet-500/50 transition-all"
