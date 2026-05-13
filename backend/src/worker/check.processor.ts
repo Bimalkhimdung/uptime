@@ -232,7 +232,10 @@ export class CheckProcessor extends WorkerHost {
 }
 
 function parseCert(
-  cert: tls.PeerCertificate | tls.DetailedPeerCertificate | Record<string, never>,
+  cert:
+    | tls.PeerCertificate
+    | tls.DetailedPeerCertificate
+    | Record<string, never>,
   authorized: boolean,
 ): SslInfo | null {
   if (!cert || Object.keys(cert).length === 0) return null;

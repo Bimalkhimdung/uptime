@@ -27,7 +27,8 @@ export class UpdateSiteDto {
 
   @ApiProperty({
     required: false,
-    description: 'GA4 property in the form "properties/123456789", or null to unlink.',
+    description:
+      'GA4 property in the form "properties/123456789", or null to unlink.',
     nullable: true,
   })
   @IsString()

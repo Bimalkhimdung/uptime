@@ -21,7 +21,12 @@ export type SiteAnalytics = {
     bounceRate: number; // 0-1
   };
   realtimeActiveUsers: number;
-  daily: Array<{ date: string; activeUsers: number; newUsers: number; sessions: number }>;
+  daily: Array<{
+    date: string;
+    activeUsers: number;
+    newUsers: number;
+    sessions: number;
+  }>;
   topPages: Array<{ path: string; views: number }>;
 };
 
@@ -97,9 +102,7 @@ export class AnalyticsService {
           dateRanges: [dateRange],
           dimensions: [{ name: 'pagePath' }],
           metrics: [{ name: 'screenPageViews' }],
-          orderBys: [
-            { metric: { metricName: 'screenPageViews' }, desc: true },
-          ],
+          orderBys: [{ metric: { metricName: 'screenPageViews' }, desc: true }],
           limit: '10',
         },
       }),

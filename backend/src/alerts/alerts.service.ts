@@ -39,11 +39,15 @@ export class AlertsService {
               <td style="padding: 8px 0; color: #6b7280;">Time</td>
               <td style="padding: 8px 0; font-weight: bold;">${formatNpt(new Date())}</td>
             </tr>
-            ${errorMessage ? `
+            ${
+              errorMessage
+                ? `
             <tr>
               <td style="padding: 8px 0; color: #6b7280;">Error</td>
               <td style="padding: 8px 0; font-weight: bold; color: #ef4444;">${errorMessage}</td>
-            </tr>` : ''}
+            </tr>`
+                : ''
+            }
           </table>
           <p style="color: #6b7280; margin-top: 20px; font-size: 14px;">
             You will receive another email when the monitor recovers.
@@ -99,14 +103,12 @@ export class AlertsService {
     const statusEmoji = isUp ? '' : isDown ? '' : '';
     const statusLabel = monitor.status || 'PENDING';
 
-    const sslLine =
-      monitor.sslValidUntil
-        ? `${formatNpt(monitor.sslValidUntil)} (${monitor.sslDaysLeft ?? '?'} days left, issuer: ${monitor.sslIssuer ?? '—'})`
-        : 'Not collected yet';
-    const domainLine =
-      monitor.domainExpiresAt
-        ? `${formatNpt(monitor.domainExpiresAt)} (${monitor.domainDaysLeft ?? '?'} days left, registrar: ${monitor.domainRegistrar ?? '—'})`
-        : 'Not collected yet';
+    const sslLine = monitor.sslValidUntil
+      ? `${formatNpt(monitor.sslValidUntil)} (${monitor.sslDaysLeft ?? '?'} days left, issuer: ${monitor.sslIssuer ?? '—'})`
+      : 'Not collected yet';
+    const domainLine = monitor.domainExpiresAt
+      ? `${formatNpt(monitor.domainExpiresAt)} (${monitor.domainDaysLeft ?? '?'} days left, registrar: ${monitor.domainRegistrar ?? '—'})`
+      : 'Not collected yet';
     const lastCheckLine = monitor.lastCheckedAt
       ? formatNpt(monitor.lastCheckedAt)
       : 'Never';

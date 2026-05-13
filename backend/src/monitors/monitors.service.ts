@@ -44,16 +44,12 @@ export class MonitorsService {
     );
 
     // Fire-and-forget WHOIS + geo lookups so the detail page has data on first load.
-    this.scheduler
-      .refreshWhoisForMonitor(monitor.id, monitor.url)
-      .catch(() => {
-        /* logged inside the service */
-      });
-    this.scheduler
-      .refreshGeoForMonitor(monitor.id, monitor.url)
-      .catch(() => {
-        /* logged inside the service */
-      });
+    this.scheduler.refreshWhoisForMonitor(monitor.id, monitor.url).catch(() => {
+      /* logged inside the service */
+    });
+    this.scheduler.refreshGeoForMonitor(monitor.id, monitor.url).catch(() => {
+      /* logged inside the service */
+    });
 
     return monitor;
   }
@@ -166,12 +162,18 @@ export class MonitorsService {
 
   async resume(userId: string, id: string) {
     const monitor = await this.update(userId, id, { isActive: true });
-    await this.checksQueue.add('check', { monitorId: id }, { jobId: `resume-${id}` });
+    await this.checksQueue.add(
+      'check',
+      { monitorId: id },
+      { jobId: `resume-${id}` },
+    );
     return monitor;
   }
 
   async getChecks(userId: string, monitorId: string, limit = 50) {
-    const monitor = await this.prisma.monitor.findUnique({ where: { id: monitorId } });
+    const monitor = await this.prisma.monitor.findUnique({
+      where: { id: monitorId },
+    });
     if (!monitor) throw new NotFoundException();
     if (monitor.userId !== userId) throw new ForbiddenException();
 
@@ -183,7 +185,9 @@ export class MonitorsService {
   }
 
   async getIncidents(userId: string, monitorId: string) {
-    const monitor = await this.prisma.monitor.findUnique({ where: { id: monitorId } });
+    const monitor = await this.prisma.monitor.findUnique({
+      where: { id: monitorId },
+    });
     if (!monitor) throw new NotFoundException();
     if (monitor.userId !== userId) throw new ForbiddenException();
 

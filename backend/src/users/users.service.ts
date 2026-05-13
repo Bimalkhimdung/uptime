@@ -62,9 +62,15 @@ export class UsersService {
   }
 
   async getStats(userId: string) {
-    const totalMonitors = await this.prisma.monitor.count({ where: { userId } });
-    const upMonitors = await this.prisma.monitor.count({ where: { userId, status: 'UP' } });
-    const downMonitors = await this.prisma.monitor.count({ where: { userId, status: 'DOWN' } });
+    const totalMonitors = await this.prisma.monitor.count({
+      where: { userId },
+    });
+    const upMonitors = await this.prisma.monitor.count({
+      where: { userId, status: 'UP' },
+    });
+    const downMonitors = await this.prisma.monitor.count({
+      where: { userId, status: 'DOWN' },
+    });
     const activeIncidents = await this.prisma.incident.count({
       where: { monitor: { userId }, resolved: false },
     });
@@ -100,7 +106,8 @@ export class UsersService {
       const existingUsername = await this.prisma.user.findUnique({
         where: { username: dto.username },
       });
-      if (existingUsername) throw new ConflictException('Username already in use');
+      if (existingUsername)
+        throw new ConflictException('Username already in use');
     }
 
     const hashed = await bcrypt.hash(dto.password, 12);
@@ -122,7 +129,9 @@ export class UsersService {
     if (!existing) throw new NotFoundException('User not found');
 
     if (dto.email && dto.email !== existing.email) {
-      const taken = await this.prisma.user.findUnique({ where: { email: dto.email } });
+      const taken = await this.prisma.user.findUnique({
+        where: { email: dto.email },
+      });
       if (taken) throw new ConflictException('Email already in use');
     }
     if (dto.username && dto.username !== existing.username) {

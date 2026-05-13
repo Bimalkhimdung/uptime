@@ -15,6 +15,7 @@ import { SitesModule } from './sites/sites.module';
 import { SeoModule } from './seo/seo.module';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { ToolsModule } from './tools/tools.module';
 
 @Module({
   imports: [
@@ -39,6 +40,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
     GoogleAuthModule,
     AnalyticsModule,
     SitesModule,
+    ToolsModule,
   ],
 })
 export class AppModule {}

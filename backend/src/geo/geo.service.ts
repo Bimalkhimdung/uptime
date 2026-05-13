@@ -18,7 +18,9 @@ export class GeoService {
   /** Extract the hostname from a URL (or pass through if already a hostname). */
   hostnameOf(urlOrHost: string): string | null {
     try {
-      return urlOrHost.includes('://') ? new URL(urlOrHost).hostname : urlOrHost;
+      return urlOrHost.includes('://')
+        ? new URL(urlOrHost).hostname
+        : urlOrHost;
     } catch {
       return null;
     }
@@ -56,7 +58,8 @@ export class GeoService {
     }
 
     try {
-      const fields = 'status,message,country,countryCode,regionName,city,lat,lon,query';
+      const fields =
+        'status,message,country,countryCode,regionName,city,lat,lon,query';
       const res = await fetch(
         `http://ip-api.com/json/${encodeURIComponent(ip)}?fields=${fields}`,
         { signal: AbortSignal.timeout(8000) },
@@ -77,7 +80,9 @@ export class GeoService {
         query?: string;
       };
       if (data.status !== 'success' || data.lat == null || data.lon == null) {
-        this.logger.warn(`ip-api lookup failed for ${ip}: ${data.message ?? 'unknown'}`);
+        this.logger.warn(
+          `ip-api lookup failed for ${ip}: ${data.message ?? 'unknown'}`,
+        );
         return null;
       }
       return {

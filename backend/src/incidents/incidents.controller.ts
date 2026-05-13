@@ -33,7 +33,10 @@ export class IncidentsController {
       where: { id, monitor: { userId: req.user.sub } },
       include: {
         monitor: {
-          include: { alertContacts: true, user: { select: { name: true, email: true } } },
+          include: {
+            alertContacts: true,
+            user: { select: { name: true, email: true } },
+          },
         },
       },
     });

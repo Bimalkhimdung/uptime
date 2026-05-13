@@ -21,7 +21,10 @@ export class CreateMonitorDto {
   @IsUrl({ require_tld: false })
   url: string;
 
-  @ApiProperty({ example: 5, description: 'Interval in minutes (1, 5, 10, 15, 30, 60)' })
+  @ApiProperty({
+    example: 5,
+    description: 'Interval in minutes (1, 5, 10, 15, 30, 60)',
+  })
   @IsInt()
   @Min(1)
   @Max(60)
@@ -75,7 +78,7 @@ export class UpdateMonitorDto {
     required: false,
     type: [String],
     description:
-      'When provided, replaces the monitor\'s email alert contacts with this list. Pass [] to remove all email contacts.',
+      "When provided, replaces the monitor's email alert contacts with this list. Pass [] to remove all email contacts.",
   })
   @IsArray()
   @IsEmail({}, { each: true })

@@ -40,7 +40,9 @@ export class GoogleAuthController {
   ) {
     const frontend = process.env.FRONTEND_URL || 'http://localhost:3000';
     if (error) {
-      return res.redirect(`${frontend}/seo?google=error&reason=${encodeURIComponent(error)}`);
+      return res.redirect(
+        `${frontend}/seo?google=error&reason=${encodeURIComponent(error)}`,
+      );
     }
     if (!code || !state) {
       return res.redirect(`${frontend}/seo?google=error&reason=missing_params`);

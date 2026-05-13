@@ -72,6 +72,33 @@ export const api = {
     get: (id: string) => request<any>(`/incidents/${id}`),
   },
 
+  tools: {
+    checkDomain: (domain: string) =>
+      request<{
+        domain: string;
+        available: boolean;
+        registrar: string | null;
+        createdAt: string | null;
+        expiresAt: string | null;
+        updatedAt: string | null;
+        daysLeft: number | null;
+        nameservers: string[];
+        status: string[];
+      }>(`/tools/domain-check?domain=${encodeURIComponent(domain)}`),
+    domainSuggestions: (domain: string) =>
+      request<{
+        input: string;
+        suggestions: Array<{
+          domain: string;
+          available: boolean | null;
+          expiresAt: string | null;
+          registrar: string | null;
+          priceUsd: number | null;
+          currency: string;
+        }>;
+      }>(`/tools/domain-suggestions?domain=${encodeURIComponent(domain)}`),
+  },
+
   sites: {
     list: () => request<any[]>('/sites'),
     get: (id: string) => request<any>(`/sites/${id}`),

@@ -59,7 +59,10 @@ export class GoogleAuthService {
   /** Builds the URL the user is sent to in order to grant analytics access. */
   buildAuthUrl(userId: string): string {
     const client = this.newOAuthClient();
-    const state = this.jwt.sign({ sub: userId, kind: 'google_oauth' }, { expiresIn: '15m' });
+    const state = this.jwt.sign(
+      { sub: userId, kind: 'google_oauth' },
+      { expiresIn: '15m' },
+    );
     return client.generateAuthUrl({
       access_type: 'offline',
       prompt: 'consent', // ensures we get a refresh_token even on re-connect
@@ -70,7 +73,10 @@ export class GoogleAuthService {
   }
 
   /** Exchanges the OAuth code for tokens, fetches the connected email, and persists. */
-  async handleCallback(code: string, state: string): Promise<{ redirectTo: string }> {
+  async handleCallback(
+    code: string,
+    state: string,
+  ): Promise<{ redirectTo: string }> {
     let userId: string;
     try {
       const decoded = this.jwt.verify<{ sub: string; kind: string }>(state);
@@ -79,7 +85,9 @@ export class GoogleAuthService {
       }
       userId = decoded.sub;
     } catch {
-      return { redirectTo: `${this.frontendUrl()}/seo?google=error&reason=invalid_state` };
+      return {
+        redirectTo: `${this.frontendUrl()}/seo?google=error&reason=invalid_state`,
+      };
     }
 
     const client = this.newOAuthClient();
@@ -89,11 +97,15 @@ export class GoogleAuthService {
       tokens = res.tokens;
     } catch (err: any) {
       this.logger.warn(`Token exchange failed: ${err?.message}`);
-      return { redirectTo: `${this.frontendUrl()}/seo?google=error&reason=exchange_failed` };
+      return {
+        redirectTo: `${this.frontendUrl()}/seo?google=error&reason=exchange_failed`,
+      };
     }
 
     if (!tokens.access_token) {
-      return { redirectTo: `${this.frontendUrl()}/seo?google=error&reason=no_access_token` };
+      return {
+        redirectTo: `${this.frontendUrl()}/seo?google=error&reason=no_access_token`,
+      };
     }
 
     // Fetch the user's Google email (informational; helps the UI show "Connected as ...").
@@ -112,7 +124,9 @@ export class GoogleAuthService {
       data: {
         googleAccessToken: tokens.access_token,
         googleRefreshToken: tokens.refresh_token ?? undefined,
-        googleTokenExpiresAt: tokens.expiry_date ? new Date(tokens.expiry_date) : null,
+        googleTokenExpiresAt: tokens.expiry_date
+          ? new Date(tokens.expiry_date)
+          : null,
         googleConnectedAt: new Date(),
         googleConnectedEmail: connectedEmail,
       },
@@ -155,7 +169,9 @@ export class GoogleAuthService {
     client.setCredentials({
       access_token: user.googleAccessToken ?? undefined,
       refresh_token: user.googleRefreshToken ?? undefined,
-      expiry_date: user.googleTokenExpiresAt ? user.googleTokenExpiresAt.getTime() : undefined,
+      expiry_date: user.googleTokenExpiresAt
+        ? user.googleTokenExpiresAt.getTime()
+        : undefined,
     });
 
     // Persist refreshed tokens so we don't keep re-refreshing.
@@ -165,13 +181,16 @@ export class GoogleAuthService {
           where: { id: userId },
           data: {
             googleAccessToken: newTokens.access_token ?? user.googleAccessToken,
-            googleRefreshToken: newTokens.refresh_token ?? user.googleRefreshToken,
+            googleRefreshToken:
+              newTokens.refresh_token ?? user.googleRefreshToken,
             googleTokenExpiresAt: newTokens.expiry_date
               ? new Date(newTokens.expiry_date)
               : user.googleTokenExpiresAt,
           },
         })
-        .catch((err) => this.logger.warn(`token persist failed: ${err?.message}`));
+        .catch((err) =>
+          this.logger.warn(`token persist failed: ${err?.message}`),
+        );
     });
 
     return client;
