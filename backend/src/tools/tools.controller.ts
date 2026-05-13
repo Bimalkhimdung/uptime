@@ -1,12 +1,43 @@
 import {
   BadGatewayException,
   BadRequestException,
+  Body,
   Controller,
   Get,
+  Post,
   Query,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { WhoisService } from '../whois/whois.service';
+import { DnsService, RecordType } from './dns.service';
+import { HttpCheckService, HttpMethod } from './http-check.service';
+import { SslCheckService } from './ssl-check.service';
+import {
+  COMMON_PORT_PRESETS,
+  PortCheckService,
+  PortProtocol,
+} from './port-check.service';
+
+const DNS_RECORD_TYPES: RecordType[] = [
+  'A',
+  'AAAA',
+  'MX',
+  'TXT',
+  'NS',
+  'CNAME',
+  'SOA',
+  'CAA',
+];
+
+const HTTP_METHODS: HttpMethod[] = [
+  'GET',
+  'HEAD',
+  'POST',
+  'PUT',
+  'DELETE',
+  'OPTIONS',
+  'PATCH',
+];
 
 const ALT_TLDS = [
   'com',
@@ -63,7 +94,13 @@ function priceForDomain(domain: string): number | null {
 @ApiTags('Tools')
 @Controller('tools')
 export class ToolsController {
-  constructor(private whois: WhoisService) {}
+  constructor(
+    private whois: WhoisService,
+    private dnsService: DnsService,
+    private httpCheckService: HttpCheckService,
+    private sslCheckService: SslCheckService,
+    private portCheckService: PortCheckService,
+  ) {}
 
   @Get('domain-check')
   async checkDomain(@Query('domain') domainQuery?: string) {
@@ -114,6 +151,234 @@ export class ToolsController {
     });
 
     return { input: cleaned, suggestions: results };
+  }
+
+  @Get('port-check')
+  async portCheck(
+    @Query('host') hostQuery?: string,
+    @Query('ports') portsQuery?: string,
+    @Query('preset') presetQuery?: string,
+    @Query('protocol') protocolQuery?: string,
+  ) {
+    if (!hostQuery || typeof hostQuery !== 'string') {
+      throw new BadRequestException('Provide a "host" query parameter.');
+    }
+    const host = parseSslHost(hostQuery);
+    if (!host) {
+      throw new BadRequestException(
+        'Could not parse a valid hostname from the input.',
+      );
+    }
+
+    let ports: number[] = [];
+    if (presetQuery) {
+      const key = presetQuery.toLowerCase();
+      const preset = COMMON_PORT_PRESETS[key];
+      if (!preset) {
+        throw new BadRequestException(
+          `Unknown preset "${presetQuery}". Use one of: ${Object.keys(COMMON_PORT_PRESETS).join(', ')}.`,
+        );
+      }
+      ports = preset.slice();
+    }
+    if (portsQuery) {
+      const parsed = portsQuery
+        .split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+        .map((s) => parseInt(s, 10))
+        .filter((n) => Number.isFinite(n));
+      if (parsed.some((p) => p < 1 || p > 65535)) {
+        throw new BadRequestException('Each port must be between 1 and 65535.');
+      }
+      ports.push(...parsed);
+    }
+    if (ports.length === 0) {
+      throw new BadRequestException(
+        'Provide at least one port via "ports" or a "preset".',
+      );
+    }
+
+    const protocol: PortProtocol =
+      (protocolQuery?.toLowerCase() as PortProtocol) || 'tcp';
+    if (protocol !== 'tcp' && protocol !== 'udp') {
+      throw new BadRequestException('Protocol must be "tcp" or "udp".');
+    }
+
+    return this.portCheckService.check(host, ports, protocol);
+  }
+
+  @Get('ssl-check')
+  async sslCheck(
+    @Query('host') hostQuery?: string,
+    @Query('port') portQuery?: string,
+  ) {
+    if (!hostQuery || typeof hostQuery !== 'string') {
+      throw new BadRequestException('Provide a "host" query parameter.');
+    }
+    const host = parseSslHost(hostQuery);
+    if (!host) {
+      throw new BadRequestException(
+        'Could not parse a valid hostname from the input.',
+      );
+    }
+    const port = portQuery ? parseInt(portQuery, 10) : 443;
+    if (!Number.isFinite(port) || port < 1 || port > 65535) {
+      throw new BadRequestException('Port must be between 1 and 65535.');
+    }
+    return this.sslCheckService.check(host, port);
+  }
+
+  @Post('curl')
+  async curl(@Body() body: unknown) {
+    if (!body || typeof body !== 'object') {
+      throw new BadRequestException('Request body must be a JSON object.');
+    }
+    const spec = body as {
+      url?: unknown;
+      method?: unknown;
+      headers?: unknown;
+      body?: unknown;
+      followRedirects?: unknown;
+    };
+
+    if (typeof spec.url !== 'string') {
+      throw new BadRequestException('"url" is required.');
+    }
+    const url = normalizeHttpUrl(spec.url);
+    if (!url) {
+      throw new BadRequestException('Could not parse a valid HTTP/HTTPS URL.');
+    }
+
+    const method: HttpMethod = (
+      typeof spec.method === 'string' ? spec.method.toUpperCase() : 'GET'
+    ) as HttpMethod;
+    if (!HTTP_METHODS.includes(method)) {
+      throw new BadRequestException(
+        `Unsupported method. Use one of: ${HTTP_METHODS.join(', ')}.`,
+      );
+    }
+
+    // Headers — accept an array of {name, value} pairs or a {name: value} map.
+    const headers = parseHeaders(spec.headers);
+    if (Object.keys(headers).length > 30) {
+      throw new BadRequestException('Too many headers (max 30).');
+    }
+
+    let requestBody: string | null = null;
+    if (typeof spec.body === 'string' && spec.body.length > 0) {
+      if (Buffer.byteLength(spec.body, 'utf8') > 1024 * 1024) {
+        throw new BadRequestException('Request body exceeds 1 MB limit.');
+      }
+      requestBody = spec.body;
+    }
+
+    const followRedirects = spec.followRedirects !== false;
+
+    return this.httpCheckService.check(url, method, undefined, {
+      headers,
+      body: requestBody,
+      followRedirects,
+      bodyPreviewBytes: 64 * 1024,
+    });
+  }
+
+  @Get('http-check')
+  async httpCheck(
+    @Query('url') urlQuery?: string,
+    @Query('method') methodQuery?: string,
+  ) {
+    if (!urlQuery || typeof urlQuery !== 'string') {
+      throw new BadRequestException('Provide a "url" query parameter.');
+    }
+    const url = normalizeHttpUrl(urlQuery);
+    if (!url) {
+      throw new BadRequestException('Could not parse a valid HTTP/HTTPS URL.');
+    }
+    const method: HttpMethod = (
+      methodQuery ? methodQuery.toUpperCase() : 'GET'
+    ) as HttpMethod;
+    if (!HTTP_METHODS.includes(method)) {
+      throw new BadRequestException(
+        `Unsupported method. Use one of: ${HTTP_METHODS.join(', ')}.`,
+      );
+    }
+    return this.httpCheckService.check(url, method);
+  }
+
+  @Get('dns-lookup')
+  async dnsLookup(
+    @Query('domain') domainQuery?: string,
+    @Query('type') typeQuery?: string,
+  ) {
+    const cleaned = parseDomain(domainQuery);
+    const host = stripWww(cleaned);
+
+    if (typeQuery && typeQuery !== 'ALL') {
+      const upper = typeQuery.toUpperCase() as RecordType;
+      if (!DNS_RECORD_TYPES.includes(upper)) {
+        throw new BadRequestException(
+          `Unsupported record type. Use one of: ${DNS_RECORD_TYPES.join(', ')}, ALL.`,
+        );
+      }
+      const set = await this.dnsService.lookup(host, upper);
+      return { host, sets: [set] };
+    }
+
+    const sets = await this.dnsService.lookupAll(host);
+    return { host, sets };
+  }
+}
+
+function stripWww(host: string): string {
+  return host.startsWith('www.') ? host.slice(4) : host;
+}
+
+function parseSslHost(input: string): string | null {
+  const trimmed = input.trim().toLowerCase();
+  if (!trimmed) return null;
+  const withoutProtocol = trimmed.replace(/^[a-z]+:\/\//, '');
+  const host = withoutProtocol.split('/')[0].split('?')[0].split(':')[0];
+  if (!/^[a-z0-9.-]+\.[a-z0-9-]+$/.test(host)) return null;
+  return host;
+}
+
+function parseHeaders(input: unknown): Record<string, string> {
+  if (!input) return {};
+  const out: Record<string, string> = {};
+  if (Array.isArray(input)) {
+    for (const row of input) {
+      if (!row || typeof row !== 'object') continue;
+      const r = row as { name?: unknown; value?: unknown };
+      if (typeof r.name !== 'string') continue;
+      const name = r.name.trim();
+      if (!name) continue;
+      const value = typeof r.value === 'string' ? r.value : '';
+      out[name] = value;
+    }
+    return out;
+  }
+  if (typeof input === 'object') {
+    for (const [k, v] of Object.entries(input as Record<string, unknown>)) {
+      if (!k || typeof v !== 'string') continue;
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+function normalizeHttpUrl(input: string): string | null {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+  const withProtocol = /^https?:\/\//i.test(trimmed)
+    ? trimmed
+    : `https://${trimmed}`;
+  try {
+    const u = new URL(withProtocol);
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return null;
+    return u.toString();
+  } catch {
+    return null;
   }
 }
 

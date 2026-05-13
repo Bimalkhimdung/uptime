@@ -48,6 +48,8 @@ const NAV_SECTIONS: NavSection[] = [
       { label: 'SSL certificate check', href: '/tools/ssl', description: 'Chain, issuer, days left.' },
       { label: 'DNS lookup', href: '/tools/dns', description: 'A / AAAA / MX / TXT records.' },
       { label: 'HTTP status check', href: '/tools/http', description: 'One-shot endpoint test.' },
+      { label: 'Online curl', href: '/tools/curl', description: 'Full request builder, headers + body.' },
+      { label: 'Port Scan', href: '/tools/ports', description: 'Probe TCP/UDP ports for open services.' },
     ],
   },
 ];
@@ -104,11 +106,10 @@ export function Nav() {
                   onClick={() => setOpenMenu(isOpen ? null : section.label)}
                   aria-haspopup="menu"
                   aria-expanded={isOpen}
-                  className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-                    isOpen
-                      ? 'text-white bg-white/[0.06]'
-                      : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
-                  }`}
+                  className={`inline-flex items-center gap-1 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isOpen
+                    ? 'text-white bg-white/[0.06]'
+                    : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+                    }`}
                 >
                   {section.label}
                   <svg

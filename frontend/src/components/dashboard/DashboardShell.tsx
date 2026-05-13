@@ -3,7 +3,6 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import { Sidebar } from './Sidebar';
-import { Footer } from '@/components/landing/Footer';
 
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
@@ -69,10 +68,7 @@ export function DashboardShell({ children }: { children: ReactNode }) {
         onMobileClose={() => setMobileNavOpen(false)}
       />
 
-      <main className="md:pl-72 relative z-10">
-        {children}
-        <Footer />
-      </main>
+      <main className="md:pl-72 relative z-10">{children}</main>
     </div>
   );
 }

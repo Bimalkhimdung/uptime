@@ -1,5 +1,19 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
 
+export type SslCert = {
+  subject: { CN: string | null; O: string | null };
+  issuer: { CN: string | null; O: string | null };
+  serialNumber: string | null;
+  fingerprintSha256: string | null;
+  validFrom: string | null;
+  validUntil: string | null;
+  daysLeft: number | null;
+  altNames: string[];
+  signatureAlgorithm: string | null;
+  keyBits: number | null;
+  selfSigned: boolean;
+};
+
 function getAuthHeaders(): Record<string, string> {
   const token =
     typeof window !== 'undefined' ? localStorage.getItem('uptime_token') : null;
@@ -85,6 +99,114 @@ export const api = {
         nameservers: string[];
         status: string[];
       }>(`/tools/domain-check?domain=${encodeURIComponent(domain)}`),
+    portCheck: (
+      host: string,
+      opts: { ports?: string; preset?: string; protocol?: 'tcp' | 'udp' },
+    ) => {
+      const params = new URLSearchParams({ host });
+      if (opts.ports) params.set('ports', opts.ports);
+      if (opts.preset) params.set('preset', opts.preset);
+      if (opts.protocol) params.set('protocol', opts.protocol);
+      return request<{
+        host: string;
+        protocol: 'tcp' | 'udp';
+        fetchedAt: string;
+        results: Array<{
+          port: number;
+          status: 'open' | 'closed' | 'timeout' | 'open|filtered' | 'error';
+          service: string | null;
+          latencyMs: number | null;
+          error: string | null;
+        }>;
+      }>(`/tools/port-check?${params.toString()}`);
+    },
+    sslCheck: (host: string, port?: number) =>
+      request<{
+        host: string;
+        port: number;
+        authorized: boolean;
+        authorizationError: string | null;
+        hostnameMatches: boolean | null;
+        protocol: string | null;
+        cipher: { name: string; version: string } | null;
+        certificate: SslCert | null;
+        chain: SslCert[];
+        fetchedAt: string;
+        error: string | null;
+      }>(`/tools/ssl-check?host=${encodeURIComponent(host)}${port ? `&port=${port}` : ''}`),
+    curl: (spec: {
+      url: string;
+      method: string;
+      headers: Array<{ name: string; value: string }>;
+      body?: string;
+      followRedirects?: boolean;
+    }) =>
+      request<{
+        url: string;
+        finalUrl: string;
+        method: string;
+        ok: boolean;
+        statusCode: number;
+        statusText: string;
+        responseTimeMs: number;
+        headers: Record<string, string>;
+        contentLength: number | null;
+        contentType: string | null;
+        bodyPreview: string | null;
+        bodyTruncated: boolean;
+        redirects: Array<{ from: string; to: string; statusCode: number }>;
+        ssl: {
+          validFrom: string | null;
+          validUntil: string | null;
+          daysLeft: number | null;
+          issuer: string | null;
+          subject: string | null;
+          authorized: boolean;
+        } | null;
+        error: string | null;
+      }>('/tools/curl', {
+        method: 'POST',
+        body: JSON.stringify(spec),
+      }),
+    httpCheck: (url: string, method: string = 'GET') =>
+      request<{
+        url: string;
+        finalUrl: string;
+        method: string;
+        ok: boolean;
+        statusCode: number;
+        statusText: string;
+        responseTimeMs: number;
+        headers: Record<string, string>;
+        contentLength: number | null;
+        contentType: string | null;
+        bodyPreview: string | null;
+        bodyTruncated: boolean;
+        redirects: Array<{ from: string; to: string; statusCode: number }>;
+        ssl: {
+          validFrom: string | null;
+          validUntil: string | null;
+          daysLeft: number | null;
+          issuer: string | null;
+          subject: string | null;
+          authorized: boolean;
+        } | null;
+        error: string | null;
+      }>(`/tools/http-check?url=${encodeURIComponent(url)}&method=${encodeURIComponent(method)}`),
+    dnsLookup: (domain: string, type: string = 'ALL') =>
+      request<{
+        host: string;
+        sets: Array<{
+          type: 'A' | 'AAAA' | 'MX' | 'TXT' | 'NS' | 'CNAME' | 'SOA' | 'CAA';
+          records: Array<{
+            type: string;
+            value: string;
+            priority?: number;
+            ttl?: number | null;
+          }>;
+          error: string | null;
+        }>;
+      }>(`/tools/dns-lookup?domain=${encodeURIComponent(domain)}&type=${encodeURIComponent(type)}`),
     domainSuggestions: (domain: string) =>
       request<{
         input: string;
