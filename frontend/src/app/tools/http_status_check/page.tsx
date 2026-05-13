@@ -185,7 +185,7 @@ export default function HttpCheckPage() {
 
           <div className="mt-12 grid sm:grid-cols-2 gap-3">
             <Link
-              href="/tools/dns"
+              href="/tools/dns_check"
               className="group bg-[#11131a] border border-white/[0.06] rounded-2xl p-5 hover:border-emerald-500/30 transition-colors"
             >
               <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-1">Also free</p>

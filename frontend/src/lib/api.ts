@@ -99,6 +99,40 @@ export const api = {
         nameservers: string[];
         status: string[];
       }>(`/tools/domain-check?domain=${encodeURIComponent(domain)}`),
+    ping: (
+      host: string,
+      opts: { mode?: 'icmp' | 'tcp'; count?: number; port?: number } = {},
+    ) => {
+      const params = new URLSearchParams({ host });
+      if (opts.mode) params.set('mode', opts.mode);
+      if (opts.count) params.set('count', String(opts.count));
+      if (opts.port) params.set('port', String(opts.port));
+      return request<{
+        host: string;
+        mode: 'icmp' | 'tcp';
+        port: number | null;
+        count: number;
+        resolvedIp: string | null;
+        packets: Array<{
+          seq: number;
+          status: 'ok' | 'timeout' | 'error';
+          rttMs: number | null;
+          ttl: number | null;
+          error: string | null;
+        }>;
+        summary: {
+          sent: number;
+          received: number;
+          lossPercent: number;
+          minMs: number | null;
+          avgMs: number | null;
+          maxMs: number | null;
+          stddevMs: number | null;
+        };
+        fetchedAt: string;
+        fallbackReason: string | null;
+      }>(`/tools/ping?${params.toString()}`);
+    },
     portCheck: (
       host: string,
       opts: { ports?: string; preset?: string; protocol?: 'tcp' | 'udp' },

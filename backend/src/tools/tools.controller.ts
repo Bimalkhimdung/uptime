@@ -17,6 +17,7 @@ import {
   PortCheckService,
   PortProtocol,
 } from './port-check.service';
+import { PingMode, PingService } from './ping.service';
 
 const DNS_RECORD_TYPES: RecordType[] = [
   'A',
@@ -100,6 +101,7 @@ export class ToolsController {
     private httpCheckService: HttpCheckService,
     private sslCheckService: SslCheckService,
     private portCheckService: PortCheckService,
+    private pingService: PingService,
   ) {}
 
   @Get('domain-check')
@@ -108,7 +110,7 @@ export class ToolsController {
     const info = await this.whois.domainInfo(cleaned);
     if (!info) {
       throw new BadGatewayException(
-        `WHOIS lookup failed for ${cleaned}. The TLD may not support WHOIS or the server is unreachable.`,
+        `WHOIS server didn't respond for ${cleaned}. The registry is likely throttling us — please try again in a moment.`,
       );
     }
     return info;
@@ -126,22 +128,36 @@ export class ToolsController {
 
     const candidates = buildCandidates(sld, tld);
 
-    // Run WHOIS lookups in parallel with a tighter timeout so the page doesn't
-    // sit on a slow TLD server. Anything that fails or times out is reported
-    // as `available: null` (unknown) instead of blocking the whole response.
-    const results = await Promise.all(
-      candidates.map(async (candidate) => {
-        const info = await this.whois.domainInfo(candidate, 5_000);
-        return {
-          domain: candidate,
-          available: info ? info.available : null,
-          expiresAt: info?.expiresAt ?? null,
-          registrar: info?.registrar ?? null,
-          priceUsd: priceForDomain(candidate),
-          currency: 'USD',
-        };
-      }),
-    );
+    // Run WHOIS lookups in small batches so registries don't rate-limit us
+    // — Verisign especially throttles aggressively when too many .com / .net
+    // lookups arrive simultaneously. Anything that fails or times out is
+    // reported as `available: null` (unknown).
+    const BATCH = 4;
+    const results: Array<{
+      domain: string;
+      available: boolean | null;
+      expiresAt: Date | null;
+      registrar: string | null;
+      priceUsd: number | null;
+      currency: string;
+    }> = [];
+    for (let i = 0; i < candidates.length; i += BATCH) {
+      const slice = candidates.slice(i, i + BATCH);
+      const batchResults = await Promise.all(
+        slice.map(async (candidate) => {
+          const info = await this.whois.domainInfo(candidate, 5_000);
+          return {
+            domain: candidate,
+            available: info ? info.available : null,
+            expiresAt: info?.expiresAt ?? null,
+            registrar: info?.registrar ?? null,
+            priceUsd: priceForDomain(candidate),
+            currency: 'USD',
+          };
+        }),
+      );
+      results.push(...batchResults);
+    }
 
     // Prefer available results first, then unknown, then taken.
     results.sort((a, b) => {
@@ -206,6 +222,37 @@ export class ToolsController {
     }
 
     return this.portCheckService.check(host, ports, protocol);
+  }
+
+  @Get('ping')
+  async ping(
+    @Query('host') hostQuery?: string,
+    @Query('mode') modeQuery?: string,
+    @Query('count') countQuery?: string,
+    @Query('port') portQuery?: string,
+  ) {
+    if (!hostQuery || typeof hostQuery !== 'string') {
+      throw new BadRequestException('Provide a "host" query parameter.');
+    }
+    const host = parseSslHost(hostQuery);
+    if (!host) {
+      throw new BadRequestException(
+        'Could not parse a valid hostname from the input.',
+      );
+    }
+    const mode: PingMode = (modeQuery?.toLowerCase() as PingMode) || 'icmp';
+    if (mode !== 'icmp' && mode !== 'tcp') {
+      throw new BadRequestException('Mode must be "icmp" or "tcp".');
+    }
+    const count = countQuery ? parseInt(countQuery, 10) : 4;
+    if (!Number.isFinite(count) || count < 1 || count > 10) {
+      throw new BadRequestException('Count must be between 1 and 10.');
+    }
+    const port = portQuery ? parseInt(portQuery, 10) : 443;
+    if (!Number.isFinite(port) || port < 1 || port > 65535) {
+      throw new BadRequestException('Port must be between 1 and 65535.');
+    }
+    return this.pingService.ping(host, { mode, count, port });
   }
 
   @Get('ssl-check')

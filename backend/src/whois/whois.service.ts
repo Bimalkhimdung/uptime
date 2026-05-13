@@ -72,9 +72,14 @@ const AVAILABLE_SIGNALS = [
   /the queried object does not exist/i,
 ];
 
+type CacheEntry = { raw: string; expiresAt: number };
+
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 minutes
+
 @Injectable()
 export class WhoisService {
   private readonly logger = new Logger(WhoisService.name);
+  private readonly cache = new Map<string, CacheEntry>();
 
   /** Extract registrable domain (eTLD+1) from a URL or hostname. */
   registrableDomain(urlOrHost: string): string | null {
@@ -92,7 +97,7 @@ export class WhoisService {
     urlOrHost: string,
     timeoutMs = 10_000,
   ): Promise<WhoisResult | null> {
-    const raw = await this.rawLookup(urlOrHost, timeoutMs);
+    const raw = await this.cachedLookup(urlOrHost, timeoutMs, false);
     if (!raw) return null;
     return parseWhois(raw);
   }
@@ -100,15 +105,16 @@ export class WhoisService {
   /** Full domain info including availability — used by the public tools endpoint. */
   async domainInfo(
     urlOrHost: string,
-    timeoutMs = 10_000,
+    timeoutMs = 15_000,
   ): Promise<DomainInfo | null> {
     const domain = this.registrableDomain(urlOrHost);
     if (!domain) return null;
 
-    const raw = await this.rawLookup(domain, timeoutMs);
+    // The main domain check retries once on timeout — Verisign and a handful
+    // of other registry WHOIS servers occasionally take a few seconds to
+    // respond, especially when we've been rate-limited.
+    const raw = await this.cachedLookup(domain, timeoutMs, true);
     if (raw == null) {
-      // Treat a hard WHOIS failure as "unknown" by returning null so the
-      // controller can map it to a 502 / informative error.
       return null;
     }
 
@@ -137,6 +143,42 @@ export class WhoisService {
     };
   }
 
+  private async cachedLookup(
+    urlOrHost: string,
+    timeoutMs: number,
+    retryOnTimeout: boolean,
+  ): Promise<string | null> {
+    const domain = this.registrableDomain(urlOrHost);
+    if (!domain) return null;
+
+    // Serve from cache if fresh.
+    const cached = this.cache.get(domain);
+    if (cached && cached.expiresAt > Date.now()) {
+      return cached.raw;
+    }
+
+    let raw = await this.rawLookup(domain, timeoutMs);
+    if (raw == null && retryOnTimeout) {
+      // One quick retry — WHOIS timeouts are usually transient throttling.
+      await new Promise((r) => setTimeout(r, 1500));
+      raw = await this.rawLookup(domain, timeoutMs);
+    }
+
+    if (raw != null) {
+      this.cache.set(domain, { raw, expiresAt: Date.now() + CACHE_TTL_MS });
+      // Prune occasionally so the map doesn't grow unbounded.
+      if (this.cache.size > 500) this.pruneCache();
+    }
+    return raw;
+  }
+
+  private pruneCache() {
+    const now = Date.now();
+    for (const [key, entry] of this.cache.entries()) {
+      if (entry.expiresAt <= now) this.cache.delete(key);
+    }
+  }
+
   private async rawLookup(
     urlOrHost: string,
     timeoutMs: number,
@@ -149,7 +191,13 @@ export class WhoisService {
         () => reject(new Error('WHOIS timeout')),
         timeoutMs,
       );
-      whois.lookup(domain, { follow: 2 }, (err, data) => {
+      // follow:0 = go straight to the registry's WHOIS server (the package
+      // already maps TLD → server from its own servers.json, no IANA hop
+      // needed). We skip referrals entirely because many registrars publish
+      // broken/unresolvable WHOIS hosts (e.g. whois.registrar.amazon) that
+      // would otherwise hang the lookup. The registry response already
+      // contains everything we parse: registrar name, expiry, NS, status.
+      whois.lookup(domain, { follow: 0, timeout: 6000 }, (err, data) => {
         clearTimeout(timer);
         if (err) reject(err);
         else resolve(data);

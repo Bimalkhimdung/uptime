@@ -18,6 +18,7 @@ const NAV_SECTIONS: NavSection[] = [
     label: 'Monitoring',
     items: [
       { label: 'HTTP/S checks', href: '#monitoring', description: 'Watch endpoints every minute.' },
+      { label: 'Ping monitoring', href: '/tools/ping_check', description: 'ICMP / TCP latency probes.' },
       { label: 'SSL certificates', href: '#monitoring', description: 'Track expiry and chain validity.' },
       { label: 'Domain expiry', href: '#monitoring', description: 'WHOIS-based renewal reminders.' },
       { label: 'Status pages', href: '#monitoring', description: 'Public uptime dashboards.' },
@@ -44,12 +45,13 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: 'Free tools',
     items: [
-      { label: 'Domain name check', href: '/tools/domain', description: 'WHOIS lookup, registrar, expiry.' },
-      { label: 'SSL certificate check', href: '/tools/ssl', description: 'Chain, issuer, days left.' },
-      { label: 'DNS lookup', href: '/tools/dns', description: 'A / AAAA / MX / TXT records.' },
-      { label: 'HTTP status check', href: '/tools/http', description: 'One-shot endpoint test.' },
-      { label: 'Online curl', href: '/tools/curl', description: 'Full request builder, headers + body.' },
-      { label: 'Port Scan', href: '/tools/ports', description: 'Probe TCP/UDP ports for open services.' },
+      { label: 'Domain name check', href: '/tools/domain_check', description: 'WHOIS lookup, registrar, expiry.' },
+      { label: 'SSL certificate check', href: '/tools/ssl_check', description: 'Chain, issuer, days left.' },
+      { label: 'DNS lookup', href: '/tools/dns_check', description: 'A / AAAA / MX / TXT records.' },
+      { label: 'HTTP status check', href: '/tools/http_status_check', description: 'One-shot endpoint test.' },
+      { label: 'Online curl', href: '/tools/online_curl', description: 'Full request builder, headers + body.' },
+      { label: 'Ping', href: '/tools/ping_check', description: 'Measure latency, ICMP or TCP.' },
+      { label: 'Port Scan', href: '/tools/port_scan', description: 'Probe TCP/UDP ports for open services.' },
     ],
   },
 ];
