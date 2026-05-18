@@ -11,8 +11,9 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: '*',
         allow: '/',
-        // Authenticated app surfaces and old/renamed routes — nothing to
-        // index there.
+        // Authenticated app surfaces — prefix matches are fine here.
+        // The `$` suffix on old tool paths anchors the match so e.g.
+        // "/tools/ping" doesn't accidentally block "/tools/ping_check".
         disallow: [
           '/dashboard',
           '/monitors',
@@ -21,13 +22,13 @@ export default function robots(): MetadataRoute.Robots {
           '/users',
           '/auth/',
           '/api/',
-          '/tools/domain',
-          '/tools/ssl',
-          '/tools/dns',
-          '/tools/curl',
-          '/tools/ping',
-          '/tools/ports',
-          '/tools/http',
+          '/tools/domain$',
+          '/tools/ssl$',
+          '/tools/dns$',
+          '/tools/curl$',
+          '/tools/ping$',
+          '/tools/ports$',
+          '/tools/http$',
         ],
       },
     ],
